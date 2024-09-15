@@ -56,7 +56,6 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> validMoves = new ArrayList<>();
 
-        // BishopMove
         if (pieceType == PieceType.BISHOP) {
             int[][] directions = {
                     {1, 1},
