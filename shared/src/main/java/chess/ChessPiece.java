@@ -123,6 +123,29 @@ public class ChessPiece {
             }
         }
 
+        if (pieceType == PieceType.KNIGHT) {
+            int[][] directions = {
+                    {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
+                    {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
+            };
+
+            for (int[] direction : directions) {
+                int newRow = myPosition.getRow() + direction[0];
+                int newCol = myPosition.getColumn() + direction[1];
+
+                if (newRow >= 1 && newRow <= 8 && newCol >=1 && newCol <= 8) {
+                    ChessPosition newPosition = new ChessPosition(newRow, newCol);
+                    ChessPiece occupyingPiece = board.getPiece(newPosition);
+
+                    if (occupyingPiece == null) {
+                        validMoves.add(new ChessMove(myPosition, newPosition, null));
+                    } else if (occupyingPiece.getTeamColor() != this.teamColor) {
+                        validMoves.add (new ChessMove(myPosition, newPosition, null));
+                    }
+                }
+            }
+        }
+
         return validMoves;
     }
 
