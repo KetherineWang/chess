@@ -6,7 +6,7 @@ public class Rules {
     static private final HashMap<ChessPiece.PieceType, MovementRule> rules = new HashMap<>();
 
     static {
-//        rules.put(ChessPiece.PieceType.KING, new KingMovementRule());
+        rules.put(ChessPiece.PieceType.KING, new KingMovementRule());
 //        rules.put(ChessPiece.PieceType.QUEEN, new QueenMovementRule());
 //        rules.put(ChessPiece.PieceType.KNIGHT, new KnightMovementRule());
         rules.put(ChessPiece.PieceType.BISHOP, new BishopMovementRule());
