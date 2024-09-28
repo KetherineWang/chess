@@ -47,10 +47,9 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-//        board.clear();
-        for (int i = 0; i < squares.length; i++) {
-            for (int j = 0; j < squares[i].length; j++) {
-                squares[i][j] = null; // Clear the board
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                squares[row][col] = null;
             }
         }
 
@@ -78,6 +77,41 @@ public class ChessBoard {
 
         for (int i = 1; i <= 8; i++) {
             addPiece(new ChessPosition(2, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+        }
+    }
+
+    public ChessPiece[][] getBoard() {
+        ChessPiece[][] copySquares = new ChessPiece[8][8];
+
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                copySquares[row][col] = squares[row][col];
+            }
+        }
+
+        return copySquares;
+    }
+
+    public void setBoard(ChessPiece[][] newSquares) {
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                squares[row][col] = newSquares[row][col];
+            }
+        }
+    }
+
+    public void movePiece(ChessMove move) {
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+
+        ChessPiece pieceToMove = getPiece(startPosition);
+
+        squares[startPosition.getRow() - 1][startPosition.getColumn() - 1] = null;
+
+        if (move.getPromotionPiece() != null) {
+            squares[endPosition.getRow() - 1][endPosition.getColumn() - 1] = new ChessPiece(pieceToMove.getTeamColor(), move.getPromotionPiece());
+        } else {
+            squares[endPosition.getRow() - 1][endPosition.getColumn() - 1] = pieceToMove;
         }
     }
 

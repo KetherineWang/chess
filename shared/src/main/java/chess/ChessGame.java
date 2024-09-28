@@ -63,8 +63,19 @@ public class ChessGame {
         Collection<ChessMove> validMoves = new HashSet<>();
         for (ChessMove move : validMoves) {
             ChessBoard tempBoard = new ChessBoard();
-            tempBoard.setBoard(board.getBoard())
+            tempBoard.setBoard(board.getBoard());
+            tempBoard.movePiece(move);
+
+            if (!isInCheck(piece.getTeamColor(), tempBoard)) {
+                validMoves.add(move);
+            }
         }
+
+        return validMoves;
+    }
+
+    private boolean isInCheck(TeamColor teamColor, ChessBoard board) {
+        throw new RuntimeException("Not implemented");
     }
 
     /**
