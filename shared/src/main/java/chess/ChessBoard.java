@@ -120,8 +120,6 @@ public class ChessBoard {
 
         if (pawn != null && pawn.getPieceType() == ChessPiece.PieceType.PAWN) {
             squares[position.getRow() - 1][position.getColumn() - 1] = new ChessPiece(pawn.getTeamColor(), promotionPiece);
-        } else {
-            throw new IllegalArgumentException("No pawn found at the given position, or the piece is not a pawn.");
         }
     }
 

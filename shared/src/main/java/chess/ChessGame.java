@@ -94,7 +94,7 @@ public class ChessGame {
         }
 
         if (kingPosition == null) {
-            throw new RuntimeException("King not found on the board");
+            return false;
         }
 
         TeamColor opposingTeamColor = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
