@@ -115,6 +115,16 @@ public class ChessBoard {
         }
     }
 
+    public void promotePawn(ChessPosition position, ChessPiece.PieceType promotionPiece) {
+        ChessPiece pawn = getPiece(position);
+
+        if (pawn != null && pawn.getPieceType() == ChessPiece.PieceType.PAWN) {
+            squares[position.getRow() - 1][position.getColumn() - 1] = new ChessPiece(pawn.getTeamColor(), promotionPiece);
+        } else {
+            throw new IllegalArgumentException("No pawn found at the given position, or the piece is not a pawn.");
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
