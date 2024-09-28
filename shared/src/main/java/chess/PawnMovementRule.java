@@ -41,14 +41,14 @@ public class PawnMovementRule extends BaseMovementRule {
         return validMoves;
     }
 
-    private void addPromotionMoves(Collection<ChessMove> validMoves, ChessPosition start, ChessPosition end, ChessGame.TeamColor teamColor) {
-        if ((teamColor == ChessGame.TeamColor.WHITE && end.getRow() == 8) || (teamColor == ChessGame.TeamColor.BLACK && end.getRow() == 1)) {
-            validMoves.add(new ChessMove(start, end, ChessPiece.PieceType.QUEEN));
-            validMoves.add(new ChessMove(start, end, ChessPiece.PieceType.KNIGHT));
-            validMoves.add(new ChessMove(start, end, ChessPiece.PieceType.BISHOP));
-            validMoves.add(new ChessMove(start, end, ChessPiece.PieceType.ROOK));
+    private void addPromotionMoves(Collection<ChessMove> validMoves, ChessPosition startPosition, ChessPosition endPosition, ChessGame.TeamColor teamColor) {
+        if ((teamColor == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8) || (teamColor == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1)) {
+            validMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.QUEEN));
+            validMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.KNIGHT));
+            validMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.BISHOP));
+            validMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.ROOK));
         } else {
-            validMoves.add(new ChessMove(start, end, null));
+            validMoves.add(new ChessMove(startPosition, endPosition, null));
         }
     }
 

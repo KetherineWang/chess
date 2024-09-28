@@ -1,8 +1,7 @@
 package chess;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Arrays;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -12,10 +11,10 @@ import java.util.Objects;
  */
 public class ChessBoard {
 
-    private Map<ChessPosition, ChessPiece> board;
+    private final ChessPiece[][] squares;
 
     public ChessBoard() {
-        board = new HashMap<>();
+        squares = new ChessPiece[8][8];
     }
 
     /**
@@ -25,7 +24,9 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        board.put(position, piece);
+        int row = position.getRow() - 1;
+        int col = position.getColumn() - 1;
+        squares[row][col] = piece;
     }
 
     /**
@@ -36,7 +37,9 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return board.get(position);
+        int row = position.getRow() - 1;
+        int col = position.getColumn() - 1;
+        return squares[row][col];
     }
 
     /**
@@ -44,7 +47,12 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        board.clear();
+//        board.clear();
+        for (int i = 0; i < squares.length; i++) {
+            for (int j = 0; j < squares[i].length; j++) {
+                squares[i][j] = null; // Clear the board
+            }
+        }
 
         addPiece(new ChessPosition(8, 1), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
         addPiece(new ChessPosition(8, 2), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
@@ -78,18 +86,18 @@ public class ChessBoard {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessBoard that = (ChessBoard) o;
-        return Objects.equals(board, that.board);
+        return Arrays.deepEquals(squares, that.squares);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(board);
+        return Objects.hash((Object) squares);
     }
 
     @Override
     public String toString() {
         return "ChessBoard{" +
-                "board=" + board +
+                "board=" + Arrays.deepToString(squares) +
                 "}";
     }
 }

@@ -38,7 +38,4 @@ public abstract class BaseMovementRule implements MovementRule {
             }
         }
     }
-
-    public abstract Collection<ChessMove> moves(ChessBoard board, ChessPosition position);
-
 }

@@ -1,7 +1,6 @@
 package chess;
 
 import java.util.Collection;
-import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -56,99 +55,6 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         return Rules.pieceRule(pieceType).moves(board, myPosition);
     }
-//        Collection<ChessMove> validMoves = new ArrayList<>();
-//
-//        if (pieceType == PieceType.BISHOP) {
-//            int[][] directions = {
-//                    {1, 1},
-//                    {1, -1},
-//                    {-1, 1},
-//                    {-1, -1}
-//            };
-//
-//            for (int[] direction : directions) {
-//                int rowChange = direction[0];
-//                int colChange = direction[1];
-//                int currentRow = myPosition.getRow();
-//                int currentCol = myPosition.getColumn();
-//
-//                while (true) {
-//                    currentRow += rowChange;
-//                    currentCol += colChange;
-//
-//                    if (currentRow < 1 || currentRow > 8 || currentCol < 1 || currentCol > 8) {
-//                        break;
-//                    }
-//
-//                    ChessPosition newPosition = new ChessPosition(currentRow, currentCol);
-//                    ChessPiece occupyingPiece = board.getPiece(newPosition);
-//
-//                    if (occupyingPiece == null) {
-//                        validMoves.add(new ChessMove(myPosition, newPosition, null));
-//                    } else {
-//                        if (occupyingPiece.getTeamColor() != this.teamColor) {
-//                            validMoves.add(new ChessMove(myPosition, newPosition, null));
-//                        }
-//
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-//
-//        if (pieceType == PieceType.KING) {
-//            int[][] directions = {
-//                    {1, 0},
-//                    {-1, 0},
-//                    {0, 1},
-//                    {0, -1},
-//                    {1, 1},
-//                    {1, -1},
-//                    {-1, 1},
-//                    {-1, -1}
-//            };
-//
-//            for (int[] direction : directions) {
-//                int newRow = myPosition.getRow() + direction[0];
-//                int newCol = myPosition.getColumn() + direction[1];
-//
-//                if (newRow >= 1 && newRow <= 8 && newCol >=1 && newCol <= 8) {
-//                    ChessPosition newPosition = new ChessPosition(newRow, newCol);
-//                    ChessPiece occupyingPiece = board.getPiece(newPosition);
-//
-//                    if (occupyingPiece == null) {
-//                        validMoves.add(new ChessMove(myPosition, newPosition, null));
-//                    } else if (occupyingPiece.getTeamColor() != this.teamColor) {
-//                        validMoves.add (new ChessMove(myPosition, newPosition, null));
-//                    }
-//                }
-//            }
-//        }
-//
-//        if (pieceType == PieceType.KNIGHT) {
-//            int[][] directions = {
-//                    {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
-//                    {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
-//            };
-//
-//            for (int[] direction : directions) {
-//                int newRow = myPosition.getRow() + direction[0];
-//                int newCol = myPosition.getColumn() + direction[1];
-//
-//                if (newRow >= 1 && newRow <= 8 && newCol >=1 && newCol <= 8) {
-//                    ChessPosition newPosition = new ChessPosition(newRow, newCol);
-//                    ChessPiece occupyingPiece = board.getPiece(newPosition);
-//
-//                    if (occupyingPiece == null) {
-//                        validMoves.add(new ChessMove(myPosition, newPosition, null));
-//                    } else if (occupyingPiece.getTeamColor() != this.teamColor) {
-//                        validMoves.add (new ChessMove(myPosition, newPosition, null));
-//                    }
-//                }
-//            }
-//        }
-//
-//        return validMoves;
 
     @Override
     public boolean equals(Object o) {

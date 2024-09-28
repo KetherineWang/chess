@@ -1,7 +1,7 @@
 package chess;
 
-import java.util.HashSet;
 import java.util.Collection;
+import java.util.HashSet;
 
 public class KingMovementRule extends BaseMovementRule {
     @Override
