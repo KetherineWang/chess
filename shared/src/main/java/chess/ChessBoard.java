@@ -108,18 +108,10 @@ public class ChessBoard {
 
         squares[startPosition.getRow() - 1][startPosition.getColumn() - 1] = null;
 
-        if (move.getPromotionPiece() != null) {
+        if (pieceToMove != null && pieceToMove.getPieceType() == ChessPiece.PieceType.PAWN && move.getPromotionPiece() != null) {
             squares[endPosition.getRow() - 1][endPosition.getColumn() - 1] = new ChessPiece(pieceToMove.getTeamColor(), move.getPromotionPiece());
         } else {
             squares[endPosition.getRow() - 1][endPosition.getColumn() - 1] = pieceToMove;
-        }
-    }
-
-    public void promotePawn(ChessPosition position, ChessPiece.PieceType promotionPiece) {
-        ChessPiece pawn = getPiece(position);
-
-        if (pawn != null && pawn.getPieceType() == ChessPiece.PieceType.PAWN) {
-            squares[position.getRow() - 1][position.getColumn() - 1] = new ChessPiece(pawn.getTeamColor(), promotionPiece);
         }
     }
 

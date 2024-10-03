@@ -58,10 +58,10 @@ public class ChessGame {
             return null;
         }
 
-        Collection<ChessMove> potentialMoves = piece.pieceMoves(board, startPosition);
+        Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
 
         Collection<ChessMove> validMoves = new HashSet<>();
-        for (ChessMove move : potentialMoves) {
+        for (ChessMove move : possibleMoves) {
             ChessBoard tempBoard = new ChessBoard();
             tempBoard.setBoard(board.getBoard());
             tempBoard.movePiece(move);
@@ -104,9 +104,9 @@ public class ChessGame {
                 ChessPiece piece = board.getPiece(position);
 
                 if (piece != null && piece.getTeamColor() == opposingTeamColor) {
-                    Collection<ChessMove> potentialMoves = piece.pieceMoves(board, position);
+                    Collection<ChessMove> possibleMoves = piece.pieceMoves(board, position);
 
-                    for (ChessMove move : potentialMoves) {
+                    for (ChessMove move : possibleMoves) {
                         if (move.getEndPosition().equals(kingPosition)) {
                             return true;
                         }
@@ -142,10 +142,6 @@ public class ChessGame {
         }
 
         board.movePiece(move);
-
-        if (move.getPromotionPiece() != null) {
-            board.promotePawn(move.getEndPosition(), move.getPromotionPiece());
-        }
 
         setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
     }
@@ -186,9 +182,9 @@ public class ChessGame {
                 ChessPiece piece = board.getPiece(position);
 
                 if (piece != null && piece.getTeamColor() == opposingTeamColor) {
-                    Collection<ChessMove> potentialMoves = piece.pieceMoves(board, position);
+                    Collection<ChessMove> possibleMoves = piece.pieceMoves(board, position);
 
-                    for (ChessMove move : potentialMoves) {
+                    for (ChessMove move : possibleMoves) {
                         if (move.getEndPosition().equals(kingPosition)) {
                             return true;
                         }
