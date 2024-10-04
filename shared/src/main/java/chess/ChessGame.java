@@ -66,7 +66,7 @@ public class ChessGame {
             tempBoard.setBoard(board.getBoard());
             tempBoard.movePiece(move);
 
-            if (!isInCheck(piece.getTeamColor(), tempBoard)) {
+            if (!isPositionInCheck(piece.getTeamColor(), tempBoard)) {
                 validMoves.add(move);
             }
         }
@@ -74,7 +74,7 @@ public class ChessGame {
         return validMoves;
     }
 
-    private boolean isInCheck(TeamColor teamColor, ChessBoard board) {
+    private boolean isPositionInCheck(TeamColor teamColor, ChessBoard board) {
         ChessPosition kingPosition = null;
 
         for (int row = 1; row <= 8; row++) {
@@ -220,7 +220,7 @@ public class ChessGame {
                         tempBoard.setBoard(board.getBoard());
                         tempBoard.movePiece(move);
 
-                        if (!isInCheck(teamColor, tempBoard)) {
+                        if (!isPositionInCheck(teamColor, tempBoard)) {
                             return false;
                         }
                     }
@@ -239,7 +239,26 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (isInCheck(teamColor)) {
+            return false;
+        }
+
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    Collection<ChessMove> validMoves = validMoves(position);
+
+                    if (!validMoves.isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
