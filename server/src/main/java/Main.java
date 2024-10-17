@@ -18,8 +18,8 @@ public class Main {
 
             System.out.printf("Chess Server started on port %d%n", chessServer);
             return;
-        } catch (Throwable ex) {
-            System.out.printf("Unable to start Chess Server: %s%n", ex.getMessage());
+        } catch (Throwable e) {
+            System.out.printf("Unable to start Chess Server: %s%n", e.getMessage());
         }
 
         System.out.println("""

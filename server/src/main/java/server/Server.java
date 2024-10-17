@@ -37,9 +37,9 @@ public class Server {
             clearService.clear();
             res.status(200);
             return "{}";
-        } catch (DataAccessException e) {
+        } catch (DataAccessException ex) {
             res.status(500);
-            throw new ResponseException(500, "Error clearing the database: " + e.getMessage());
+            throw new ResponseException(500, "Error clearing the database: " + ex.getMessage());
         }
     }
 
