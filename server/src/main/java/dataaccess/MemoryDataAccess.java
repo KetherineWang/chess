@@ -1,8 +1,8 @@
 package dataaccess;
 
 import model.UserData;
-import model.GameData;
 import model.AuthData;
+import model.GameData;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,12 +14,27 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public void clear() throws DataAccessException {
-        try {
-            users.clear();
-            games.clear();
-            authTokens.clear();
-        } catch (Exception e) {
-            throw new DataAccessException("Failed to clear database");
+        users.clear();
+        games.clear();
+        authTokens.clear();
+    }
+
+    @Override
+    public void createUser(UserData userData) throws DataAccessException {
+        if (users.containsKey(userData.username())) {
+            throw new DataAccessException("User already exists");
         }
+
+        users.put(userData.username(), userData);
+    }
+
+    @Override
+    public UserData getUser(String username) throws DataAccessException {
+        return users.get(username);
+    }
+
+    @Override
+    public void createAuth(AuthData authData) throws DataAccessException {
+        authTokens.put(authData.authToken(), authData);
     }
 }

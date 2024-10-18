@@ -1,15 +1,29 @@
 package server;
 
 import service.ClearService;
+import service.RegisterService;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import dataaccess.DataAccessException;
+import model.UserData;
+import model.AuthData;
+import model.RegisterRequest;
+import model.RegisterResult;
+
+import com.google.gson.Gson;
 import exception.ResponseException;
 import spark.*;
 
 public class Server {
-    private final DataAccess dataAccess = new MemoryDataAccess();
-    private final ClearService clearService = new ClearService(dataAccess);
+    private final DataAccess dataAccess;
+    private final ClearService clearService;
+    private final RegisterService registerService;
+
+    public Server() {
+        this.dataAccess = new MemoryDataAccess();
+        this.clearService = new ClearService(dataAccess);
+        this.registerService = new RegisterService(dataAccess);
+    }
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -18,6 +32,8 @@ public class Server {
 
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", this::clearDatabase);
+        Spark.post("/user", this::registerUser);
+
         Spark.exception(ResponseException.class, this::exceptionHandler);
 
         //This line initializes the server and can be removed once you have a functioning endpoint 
@@ -40,6 +56,33 @@ public class Server {
         } catch (DataAccessException ex) {
             res.status(500);
             throw new ResponseException(500, "Error clearing the database: " + ex.getMessage());
+        }
+    }
+
+    private Object registerUser(Request req, Response res) throws ResponseException {
+        try {
+            RegisterRequest registerRequest = new Gson().fromJson(req.body(), RegisterRequest.class);
+
+            if (registerRequest.username() == null || registerRequest.username().isEmpty() ||
+                registerRequest.password() == null || registerRequest.password().isEmpty() ||
+                registerRequest.email() == null || registerRequest.email().isEmpty()) {
+                res.status(400);
+                return "{ \"message\": \"Error: bad request\" }";
+            }
+
+            UserData newUser = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
+
+            AuthData authData = registerService.register(newUser);
+
+            RegisterResult registerResult = new RegisterResult(authData.username(), authData.authToken());
+            res.status(200);
+            return new Gson().toJson(registerResult);
+        } catch (DataAccessException ex) {
+            res.status(403);
+            return "{ \"message\": \"Error: already taken\" }";
+        } catch (Exception e) {
+            res.status(500);
+            return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
         }
     }
 

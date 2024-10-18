@@ -4,6 +4,9 @@ import service.ClearService;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import dataaccess.DataAccessException;
+import model.UserData;
+import model.AuthData;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +34,17 @@ class ClearServiceTest {
             public void clear() throws DataAccessException {
                 throw new DataAccessException("clear_failure() test exception");
             }
+
+            @Override
+            public void createUser(UserData userData) throws DataAccessException {}
+
+            @Override
+            public UserData getUser(String username) throws DataAccessException {
+                return null;
+            }
+
+            @Override
+            public void createAuth(AuthData authData) throws DataAccessException {}
         };
 
         ClearService faultyClearService = new ClearService(faultyDataAccess);
