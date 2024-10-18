@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ClearServiceTest {
-    private ClearService clearService;
     private DataAccess dataAccess;
+    private ClearService clearService;
 
     @BeforeEach
     void setUp() {

@@ -20,17 +20,17 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public void createUser(UserData userData) throws DataAccessException {
-        if (users.containsKey(userData.username())) {
-            throw new DataAccessException("User already exists");
-        }
-
-        users.put(userData.username(), userData);
+    public UserData getUser(String username) throws DataAccessException {
+        return users.get(username);
     }
 
     @Override
-    public UserData getUser(String username) throws DataAccessException {
-        return users.get(username);
+    public void createUser(UserData userData) throws DataAccessException {
+        if (users.containsKey(userData.username())) {
+            throw new DataAccessException("user already exists");
+        }
+
+        users.put(userData.username(), userData);
     }
 
     @Override

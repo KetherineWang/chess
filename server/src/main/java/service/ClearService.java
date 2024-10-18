@@ -4,7 +4,7 @@ import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 
 public class ClearService{
-    private DataAccess dataAccess;
+    private final DataAccess dataAccess;
 
     public ClearService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;

@@ -55,7 +55,7 @@ public class Server {
             return "{}";
         } catch (DataAccessException ex) {
             res.status(500);
-            throw new ResponseException(500, "Error clearing the database: " + ex.getMessage());
+            throw new ResponseException(500, ex.getMessage());
         }
     }
 
@@ -82,12 +82,12 @@ public class Server {
             return "{ \"message\": \"Error: already taken\" }";
         } catch (Exception e) {
             res.status(500);
-            return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
+            throw new ResponseException(500, e.getMessage());
         }
     }
 
     private void exceptionHandler(ResponseException ex, Request req, Response res) {
         res.status(ex.getStatusCode());
-        res.body("{ \"message\": \"" + ex.getMessage() + "\" }");
+        res.body("{ \"message\": \"Error: " + ex.getMessage() + "\" }");
     }
 }
