@@ -1,28 +1,26 @@
 package server;
 
-import service.ClearService;
-import service.RegisterService;
+import service.*;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import dataaccess.DataAccessException;
-import model.UserData;
-import model.AuthData;
-import model.RegisterRequest;
-import model.RegisterResult;
+import model.*;
 
+import spark.*;
 import com.google.gson.Gson;
 import exception.ResponseException;
-import spark.*;
 
 public class Server {
     private final DataAccess dataAccess;
     private final ClearService clearService;
     private final RegisterService registerService;
+    private final LoginService loginService;
 
     public Server() {
         this.dataAccess = new MemoryDataAccess();
         this.clearService = new ClearService(dataAccess);
         this.registerService = new RegisterService(dataAccess);
+        this.loginService = new LoginService(dataAccess);
     }
 
     public int run(int desiredPort) {
@@ -33,6 +31,7 @@ public class Server {
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", this::clearDatabase);
         Spark.post("/user", this::registerUser);
+        Spark.post("/session", this::loginUser);
 
         Spark.exception(ResponseException.class, this::exceptionHandler);
 
@@ -80,6 +79,24 @@ public class Server {
         } catch (DataAccessException ex) {
             res.status(403);
             return "{ \"message\": \"Error: already taken\" }";
+        } catch (Exception e) {
+            res.status(500);
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
+
+    private Object loginUser(Request req, Response res) throws ResponseException {
+        try {
+            LoginRequest loginRequest = new Gson().fromJson(req.body(), LoginRequest.class);
+
+            AuthData authData = loginService.login(loginRequest.username(), loginRequest.password());
+
+            LoginResult loginResult = new LoginResult(authData.username(), authData.authToken());
+            res.status(200);
+            return new Gson().toJson(loginResult);
+        } catch (DataAccessException ex) {
+            res.status(401);
+            return "{ \"message\": \"Error: unauthorized\" }";
         } catch (Exception e) {
             res.status(500);
             throw new ResponseException(500, e.getMessage());

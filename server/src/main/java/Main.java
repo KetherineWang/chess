@@ -1,9 +1,4 @@
-import chess.*;
-
-import service.ClearService;
-import service.RegisterService;
 import server.Server;
-import dataaccess.MemoryDataAccess;
 
 public class Main {
     public static void main(String[] args) {
@@ -14,9 +9,6 @@ public class Main {
                 port = Integer.parseInt(args[0]);
             }
 
-//            var dataAccess = new MemoryDataAccess();
-//            var clearService = new ClearService(dataAccess);
-//            var registerService = new RegisterService(dataAccess);
             var chessServer = new Server().run(port);
 
             System.out.printf("Chess Server started on port %d%n", chessServer);

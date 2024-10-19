@@ -8,7 +8,7 @@ import model.AuthData;
 public class RegisterService {
     private final DataAccess dataAccess;
 
-    public RegisterService (DataAccess dataAccess) {
+    public RegisterService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
 
