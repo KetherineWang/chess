@@ -22,40 +22,23 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public UserData getUser(String username) throws DataAccessException {
-        return users.get(username);
-    }
+    public UserData getUser(String username) { return users.get(username); }
 
     @Override
-    public void createUser(UserData userData) throws DataAccessException {
-        if (users.containsKey(userData.username())) {
-            throw new DataAccessException("user already exists");
-        }
-
-        users.put(userData.username(), userData);
-    }
+    public void createUser(UserData userData) { users.put(userData.username(), userData); }
 
     @Override
-    public void createAuth(AuthData authData) throws DataAccessException {
-        authTokens.put(authData.authToken(), authData);
-    }
+    public void createAuth(AuthData authData) { authTokens.put(authData.authToken(), authData); }
 
     @Override
-    public AuthData getAuth(String authToken) throws DataAccessException {
-        return authTokens.get(authToken);
-    }
+    public AuthData getAuth(String authToken) { return authTokens.get(authToken); }
 
     @Override
-    public void deleteAuth(String authToken) throws DataAccessException {
-        if (!authTokens.containsKey(authToken)) {
-            throw new DataAccessException("auth token not found");
-        }
-
-        authTokens.remove(authToken);
-    }
+    public void deleteAuth(String authToken) { authTokens.remove(authToken); }
 
     @Override
-    public List<GameData> listGames() throws DataAccessException {
-        return new ArrayList<>(games.values());
-    }
+    public List<GameData> listGames() { return new ArrayList<>(games.values()); }
+
+    @Override
+    public void createGame(GameData gameData) { games.put(gameData.gameID(), gameData); }
 }

@@ -14,7 +14,7 @@ public class RegisterService {
 
     public AuthData register(UserData userData) throws DataAccessException {
         if (dataAccess.getUser(userData.username()) != null) {
-            throw new DataAccessException("username already taken");
+            throw new DataAccessException("username already exists");
         }
 
         dataAccess.createUser(userData);

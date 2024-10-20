@@ -20,6 +20,7 @@ public class Server {
     private final LoginService loginService;
     private final LogoutService logoutService;
     private final ListGamesService listGamesService;
+    private final CreateGameService createGameService;
 
     public Server() {
         this.dataAccess = new MemoryDataAccess();
@@ -28,6 +29,7 @@ public class Server {
         this.loginService = new LoginService(dataAccess);
         this.logoutService = new LogoutService(dataAccess);
         this.listGamesService = new ListGamesService(dataAccess);
+        this.createGameService = new CreateGameService(dataAccess);
     }
 
     public int run(int desiredPort) {
@@ -41,6 +43,7 @@ public class Server {
         Spark.post("/session", this::loginUser);
         Spark.delete("/session", this::logoutUser);
         Spark.get("/game", this::listGames);
+        Spark.post("/game", this::createGame);
 
         Spark.exception(ResponseException.class, this::exceptionHandler);
 
@@ -145,6 +148,36 @@ public class Server {
             List<GameData> games = listGamesService.listGames(authToken);
             res.status(200);
             return new Gson().toJson(Map.of("games", games));
+        } catch (DataAccessException ex) {
+            res.status(401);
+            return "{ \"message\": \"Error: unauthorized\" }";
+        } catch (Exception e) {
+            res.status(500);
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
+
+    private Object createGame(Request req, Response res) throws ResponseException {
+        try {
+            String authToken = req.headers("authorization");
+
+            if (authToken == null || authToken.isEmpty()) {
+                res.status(401);
+                return "{ \"message\": \"Error: unauthorized\" }";
+            }
+
+            CreateGameRequest createGameRequest = new Gson().fromJson(req.body(), CreateGameRequest.class);
+
+            if (createGameRequest.gameName() == null || createGameRequest.gameName().isEmpty()) {
+                res.status(400);
+                return "{ \"message\": \"Error: bad request\" }";
+            }
+
+            GameData gameData = createGameService.createGame(createGameRequest.gameName(), authToken);
+
+            CreateGameResult createGameResult = new CreateGameResult(gameData.gameID());
+            res.status(200);
+            return new Gson().toJson(createGameResult);
         } catch (DataAccessException ex) {
             res.status(401);
             return "{ \"message\": \"Error: unauthorized\" }";

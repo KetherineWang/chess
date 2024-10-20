@@ -16,10 +16,17 @@ public class CreateGameService {
     public GameData createGame(String gameName, String authToken) throws DataAccessException {
         AuthData authData = dataAccess.getAuth(authToken);
 
-        if (authToken == null) {
-            throw new DataAccessException("invalid auth token");
-
-            GameData newGame = new GameData(generateGameID(), authData.username(), null, gameName, new ChessGame());
+        if (authData == null) {
+            throw new DataAccessException("auth token not found");
         }
+
+        GameData gameData = new GameData(generateGameID(), authData.username(), null, gameName, new ChessGame());
+        dataAccess.createGame(gameData);
+
+        return gameData;
+    }
+
+    private int generateGameID() {
+        return (int) (Math.random() * 100000);
     }
 }

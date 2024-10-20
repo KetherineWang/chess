@@ -15,7 +15,7 @@ public class LogoutService {
         AuthData authData = dataAccess.getAuth(authToken);
 
         if (authData == null) {
-            throw new DataAccessException("invalid auth token");
+            throw new DataAccessException("auth token not found");
         }
 
         dataAccess.deleteAuth(authToken);
