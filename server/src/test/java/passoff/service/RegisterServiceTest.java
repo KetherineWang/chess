@@ -39,7 +39,7 @@ class RegisterServiceTest {
         try {
             registerService.register(existingUser);
         } catch (DataAccessException ex) {
-            fail("initial user registration should not fil: " + ex.getMessage());
+            fail("initial user registration should not fail: " + ex.getMessage());
         }
 
         DataAccessException ex = assertThrows(DataAccessException.class, () -> {

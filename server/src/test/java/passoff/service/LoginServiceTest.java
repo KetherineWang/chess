@@ -25,7 +25,7 @@ class LoginServiceTest {
         try {
             dataAccess.createUser(testUser);
         } catch (DataAccessException ex) {
-            fail("failed to create test user");
+            fail("initial user creation should not fail");
         }
 
         loginService = new LoginService(dataAccess);
