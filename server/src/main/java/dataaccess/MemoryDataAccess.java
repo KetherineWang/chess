@@ -37,4 +37,18 @@ public class MemoryDataAccess implements DataAccess {
     public void createAuth(AuthData authData) throws DataAccessException {
         authTokens.put(authData.authToken(), authData);
     }
+
+    @Override
+    public AuthData getAuth(String authToken) throws DataAccessException {
+        return authTokens.get(authToken);
+    }
+
+    @Override
+    public void deleteAuth(String authToken) throws DataAccessException {
+        if (!authTokens.containsKey(authToken)) {
+            throw new DataAccessException("auth token not found");
+        }
+
+        authTokens.remove(authToken);
+    }
 }

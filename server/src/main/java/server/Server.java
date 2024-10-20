@@ -15,12 +15,14 @@ public class Server {
     private final ClearService clearService;
     private final RegisterService registerService;
     private final LoginService loginService;
+    private final LogoutService logoutService;
 
     public Server() {
         this.dataAccess = new MemoryDataAccess();
         this.clearService = new ClearService(dataAccess);
         this.registerService = new RegisterService(dataAccess);
         this.loginService = new LoginService(dataAccess);
+        this.logoutService = new LogoutService(dataAccess);
     }
 
     public int run(int desiredPort) {
@@ -32,6 +34,7 @@ public class Server {
         Spark.delete("/db", this::clearDatabase);
         Spark.post("/user", this::registerUser);
         Spark.post("/session", this::loginUser);
+        Spark.delete("/session", this::logoutUser);
 
         Spark.exception(ResponseException.class, this::exceptionHandler);
 
@@ -94,6 +97,27 @@ public class Server {
             LoginResult loginResult = new LoginResult(authData.username(), authData.authToken());
             res.status(200);
             return new Gson().toJson(loginResult);
+        } catch (DataAccessException ex) {
+            res.status(401);
+            return "{ \"message\": \"Error: unauthorized\" }";
+        } catch (Exception e) {
+            res.status(500);
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
+
+    private Object logoutUser(Request req, Response res) throws ResponseException {
+        try {
+            String authToken = req.headers("authorization");
+
+            if (authToken == null || authToken.isEmpty()) {
+                res.status(401);
+                return "{ \"message\": \"Error: unauthorized\" }";
+            }
+
+            logoutService.logout(authToken);
+            res.status(200);
+            return "{}";
         } catch (DataAccessException ex) {
             res.status(401);
             return "{ \"message\": \"Error: unauthorized\" }";

@@ -39,12 +39,16 @@ class ClearServiceTest {
             public void createUser(UserData userData) throws DataAccessException {}
 
             @Override
-            public UserData getUser(String username) throws DataAccessException {
-                return null;
-            }
+            public UserData getUser(String username) throws DataAccessException { return null; }
 
             @Override
             public void createAuth(AuthData authData) throws DataAccessException {}
+
+            @Override
+            public AuthData getAuth(String authToken) throws DataAccessException { return null; }
+
+            @Override
+            public void deleteAuth(String authToken) throws DataAccessException {}
         };
 
         ClearService faultyClearService = new ClearService(faultyDataAccess);
