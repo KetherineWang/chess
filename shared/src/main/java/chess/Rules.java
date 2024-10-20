@@ -3,18 +3,18 @@ package chess;
 import java.util.HashMap;
 
 public class Rules {
-    static private final HashMap<ChessPiece.PieceType, MovementRule> rules = new HashMap<>();
+    static private final HashMap<ChessPiece.PieceType, MovementRule> RULES = new HashMap<>();
 
     static {
-        rules.put(ChessPiece.PieceType.KING, new KingMovementRule());
-        rules.put(ChessPiece.PieceType.QUEEN, new QueenMovementRule());
-        rules.put(ChessPiece.PieceType.KNIGHT, new KnightMovementRule());
-        rules.put(ChessPiece.PieceType.BISHOP, new BishopMovementRule());
-        rules.put(ChessPiece.PieceType.ROOK, new RookMovementRule());
-        rules.put(ChessPiece.PieceType.PAWN, new PawnMovementRule());
+        RULES.put(ChessPiece.PieceType.KING, new KingMovementRule());
+        RULES.put(ChessPiece.PieceType.QUEEN, new QueenMovementRule());
+        RULES.put(ChessPiece.PieceType.KNIGHT, new KnightMovementRule());
+        RULES.put(ChessPiece.PieceType.BISHOP, new BishopMovementRule());
+        RULES.put(ChessPiece.PieceType.ROOK, new RookMovementRule());
+        RULES.put(ChessPiece.PieceType.PAWN, new PawnMovementRule());
     }
 
     public static MovementRule pieceRule(ChessPiece.PieceType pieceType) {
-        return rules.get(pieceType);
+        return RULES.get(pieceType);
     }
 }

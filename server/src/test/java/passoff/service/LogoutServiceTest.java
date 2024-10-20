@@ -30,7 +30,7 @@ class LogoutServiceTest {
     }
 
     @Test
-    void logout_success() throws DataAccessException {
+    void logoutSuccess() throws DataAccessException {
         logoutService.logout(validAuthToken.authToken());
 
         AuthData authData = dataAccess.getAuth(validAuthToken.authToken());
@@ -38,7 +38,7 @@ class LogoutServiceTest {
     }
 
     @Test
-    void logout_failure_invalidAuthToken() {
+    void logoutFailureInvalidAuthToken() {
         String invalidAuthToken = "invalidAuthToken";
 
         DataAccessException ex = assertThrows(DataAccessException.class, () -> {
@@ -49,7 +49,7 @@ class LogoutServiceTest {
     }
 
     @Test
-    void logout_failure_nullAuthToken() {
+    void logoutFailureNullAuthToken() {
         DataAccessException ex = assertThrows(DataAccessException.class, () -> {
             logoutService.logout(null);
         });

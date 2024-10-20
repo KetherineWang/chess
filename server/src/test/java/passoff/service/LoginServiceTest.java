@@ -32,7 +32,7 @@ class LoginServiceTest {
     }
 
     @Test
-    void login_success() throws DataAccessException {
+    void loginSuccess() throws DataAccessException {
         AuthData authData = loginService.login("testUser", "password123");
 
         assertNotNull(authData, "authData should not be null");
@@ -41,7 +41,7 @@ class LoginServiceTest {
     }
 
     @Test
-    void login_failure_invalidUsername() {
+    void loginFailureInvalidUsername() {
         DataAccessException ex = assertThrows(DataAccessException.class, () -> {
             loginService.login("invalidUsername", "password123");
         });
@@ -50,7 +50,7 @@ class LoginServiceTest {
     }
 
     @Test
-    void login_failure_invalidPassword() {
+    void loginFailureInvalidPassword() {
         DataAccessException ex = assertThrows(DataAccessException.class, () -> {
             loginService.login("testUser", "invalidPassword");
         });

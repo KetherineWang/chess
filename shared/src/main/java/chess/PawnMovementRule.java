@@ -20,7 +20,8 @@ public class PawnMovementRule extends BaseMovementRule {
             addPromotionMoves(validMoves, position, oneStepForward, pawn.getTeamColor());
         }
 
-        if ((position.getRow() == 2 && pawn.getTeamColor() == ChessGame.TeamColor.WHITE) || (position.getRow() == 7 && pawn.getTeamColor() == ChessGame.TeamColor.BLACK)) {
+        if ((position.getRow() == 2 && pawn.getTeamColor() == ChessGame.TeamColor.WHITE) ||
+                (position.getRow() == 7 && pawn.getTeamColor() == ChessGame.TeamColor.BLACK)) {
             ChessPosition twoStepsForward = new ChessPosition(position.getRow() + 2 * direction, position.getColumn());
             if (board.getPiece(oneStepForward) == null && board.getPiece(twoStepsForward) == null) {
                 validMoves.add(new ChessMove(position, twoStepsForward, null));
@@ -41,8 +42,10 @@ public class PawnMovementRule extends BaseMovementRule {
         return validMoves;
     }
 
-    private void addPromotionMoves(Collection<ChessMove> validMoves, ChessPosition startPosition, ChessPosition endPosition, ChessGame.TeamColor teamColor) {
-        if ((teamColor == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8) || (teamColor == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1)) {
+    private void addPromotionMoves(Collection<ChessMove> validMoves, ChessPosition startPosition,
+                                   ChessPosition endPosition, ChessGame.TeamColor teamColor) {
+        if ((teamColor == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8) ||
+                (teamColor == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1)) {
             validMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.QUEEN));
             validMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.KNIGHT));
             validMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.BISHOP));

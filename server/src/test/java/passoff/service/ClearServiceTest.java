@@ -26,12 +26,12 @@ class ClearServiceTest {
     }
 
     @Test
-    void clear_success() {
+    void clearSuccess() {
         assertDoesNotThrow(() -> clearService.clear(), "clear() method threw an exception");
     }
 
     @Test
-    void clear_failure() {
+    void clearFailure() {
         DataAccess faultyDataAccess = new DataAccess() {
             @Override
             public void clear() throws DataAccessException {

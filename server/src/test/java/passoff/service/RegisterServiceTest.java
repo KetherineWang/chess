@@ -23,7 +23,7 @@ class RegisterServiceTest {
     }
 
     @Test
-    void register_success() throws DataAccessException {
+    void registerSuccess() throws DataAccessException {
         UserData newUser = new UserData("ketherine_wang", "password0528", "ketherine.wang@email.com");
 
         AuthData authData = registerService.register(newUser);
@@ -33,7 +33,7 @@ class RegisterServiceTest {
     }
 
     @Test
-    void register_failure_usernameAlreadyTaken() {
+    void registerFailureUsernameAlreadyTaken() {
         UserData existingUser = new UserData("hongting_wang", "password0718", "hongting.wang@email.com");
 
         try {
