@@ -6,11 +6,13 @@ import model.GameData;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MemoryDataAccess implements DataAccess {
     final private Map<String, UserData> users = new HashMap<>();
-    final private Map<Integer, GameData> games = new HashMap<>();
     final private Map<String, AuthData> authTokens = new HashMap<>();
+    final private Map<Integer, GameData> games = new HashMap<>();
 
     @Override
     public void clear() throws DataAccessException {
@@ -50,5 +52,10 @@ public class MemoryDataAccess implements DataAccess {
         }
 
         authTokens.remove(authToken);
+    }
+
+    @Override
+    public List<GameData> listGames() throws DataAccessException {
+        return new ArrayList<>(games.values());
     }
 }

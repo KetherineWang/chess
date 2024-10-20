@@ -6,6 +6,9 @@ import dataaccess.MemoryDataAccess;
 import dataaccess.DataAccessException;
 import model.*;
 
+import java.util.List;
+import java.util.Map;
+
 import spark.*;
 import com.google.gson.Gson;
 import exception.ResponseException;
@@ -16,6 +19,7 @@ public class Server {
     private final RegisterService registerService;
     private final LoginService loginService;
     private final LogoutService logoutService;
+    private final ListGamesService listGamesService;
 
     public Server() {
         this.dataAccess = new MemoryDataAccess();
@@ -23,6 +27,7 @@ public class Server {
         this.registerService = new RegisterService(dataAccess);
         this.loginService = new LoginService(dataAccess);
         this.logoutService = new LogoutService(dataAccess);
+        this.listGamesService = new ListGamesService(dataAccess);
     }
 
     public int run(int desiredPort) {
@@ -35,6 +40,7 @@ public class Server {
         Spark.post("/user", this::registerUser);
         Spark.post("/session", this::loginUser);
         Spark.delete("/session", this::logoutUser);
+        Spark.get("/game", this::listGames);
 
         Spark.exception(ResponseException.class, this::exceptionHandler);
 
@@ -118,6 +124,27 @@ public class Server {
             logoutService.logout(authToken);
             res.status(200);
             return "{}";
+        } catch (DataAccessException ex) {
+            res.status(401);
+            return "{ \"message\": \"Error: unauthorized\" }";
+        } catch (Exception e) {
+            res.status(500);
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
+
+    private Object listGames(Request req, Response res) throws ResponseException {
+        try {
+            String authToken = req.headers("authorization");
+
+            if (authToken == null || authToken.isEmpty()) {
+                res.status(401);
+                return "{ \"message\": \"Error: unauthorized\" }";
+            }
+
+            List<GameData> games = listGamesService.listGames(authToken);
+            res.status(200);
+            return new Gson().toJson(Map.of("games", games));
         } catch (DataAccessException ex) {
             res.status(401);
             return "{ \"message\": \"Error: unauthorized\" }";

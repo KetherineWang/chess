@@ -3,21 +3,24 @@ package service;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.AuthData;
+import model.GameData;
 
-public class LogoutService {
+import java.util.List;
+
+public class ListGamesService {
     private final DataAccess dataAccess;
 
-    public LogoutService(DataAccess dataAccess) {
+    public ListGamesService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
 
-    public void logout(String authToken) throws DataAccessException {
+    public List<GameData> listGames(String authToken) throws DataAccessException {
         AuthData authData = dataAccess.getAuth(authToken);
 
         if (authData == null) {
             throw new DataAccessException("invalid auth token");
         }
 
-        dataAccess.deleteAuth(authToken);
+        return dataAccess.listGames();
     }
 }

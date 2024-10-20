@@ -6,6 +6,9 @@ import dataaccess.MemoryDataAccess;
 import dataaccess.DataAccessException;
 import model.UserData;
 import model.AuthData;
+import model.GameData;
+
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +52,9 @@ class ClearServiceTest {
 
             @Override
             public void deleteAuth(String authToken) throws DataAccessException {}
+
+            @Override
+            public List<GameData> listGames() throws DataAccessException { return null; }
         };
 
         ClearService faultyClearService = new ClearService(faultyDataAccess);
