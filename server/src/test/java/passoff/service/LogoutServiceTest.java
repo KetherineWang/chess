@@ -14,38 +14,41 @@ import static org.junit.jupiter.api.Assertions.*;
 class LogoutServiceTest {
     private DataAccess dataAccess;
     private LogoutService logoutService;
-    private AuthData validAuthToken;
+    private AuthData validAuthData;
+    private AuthData invalidAuthData;
 
     @BeforeEach
     void setUp() {
         dataAccess = new MemoryDataAccess();
-        logoutService = new LogoutService(dataAccess);
+
+        validAuthData = new AuthData("testUser", "validAuthToken");
 
         try {
-            validAuthToken = new AuthData("testUser", "validAuthToken");
-            dataAccess.createAuth(validAuthToken);
+            dataAccess.createAuth(validAuthData);
         } catch (DataAccessException ex) {
             fail("initial auth creation should not fail");
         }
+
+        logoutService = new LogoutService(dataAccess);
+
+        invalidAuthData = new AuthData("testUser", "invalidAuthToken");
     }
 
     @Test
     void logoutSuccess() throws DataAccessException {
-        logoutService.logout(validAuthToken.authToken());
+        logoutService.logout(validAuthData.authToken());
 
-        AuthData authData = dataAccess.getAuth(validAuthToken.authToken());
+        AuthData authData = dataAccess.getAuth(validAuthData.authToken());
         assertNull(authData, "authData should be null after successful logout");
     }
 
     @Test
     void logoutFailureInvalidAuthToken() {
-        String invalidAuthToken = "invalidAuthToken";
-
         DataAccessException ex = assertThrows(DataAccessException.class, () -> {
-            logoutService.logout(invalidAuthToken);
+            logoutService.logout(invalidAuthData.authToken());
         });
 
-        assertEquals("invalid authToken", ex.getMessage());
+        assertEquals("invalid auth token", ex.getMessage());
     }
 
     @Test
@@ -54,7 +57,7 @@ class LogoutServiceTest {
             logoutService.logout(null);
         });
 
-        assertEquals("invalid authToken", ex.getMessage());
+        assertEquals("invalid auth token", ex.getMessage());
     }
 
 }

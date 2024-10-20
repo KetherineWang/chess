@@ -46,6 +46,6 @@ class RegisterServiceTest {
             registerService.register(existingUser);
         });
 
-        assertEquals("username already taken", ex.getMessage());
+        assertEquals("username already exists", ex.getMessage());
     }
 }

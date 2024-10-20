@@ -17,7 +17,7 @@ public class CreateGameService {
         AuthData authData = dataAccess.getAuth(authToken);
 
         if (authData == null) {
-            throw new DataAccessException("auth token not found");
+            throw new DataAccessException("invalid auth token");
         }
 
         GameData gameData = new GameData(generateGameID(), authData.username(), null, gameName, new ChessGame());
