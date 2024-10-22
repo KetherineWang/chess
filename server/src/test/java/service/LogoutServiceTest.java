@@ -1,4 +1,4 @@
-package passoff.service;
+package service;
 
 import service.LogoutService;
 import dataaccess.DataAccess;

@@ -1,4 +1,4 @@
-package passoff.service;
+package service;
 
 import chess.ChessGame;
 import service.CreateGameService;
