@@ -173,14 +173,22 @@ public class Server {
                 return "{ \"message\": \"Error: bad request\" }";
             }
 
-            GameData gameData = createGameService.createGame(createGameRequest.gameName(), authToken);
+            GameData gameData = createGameService.createGame(authToken, createGameRequest.gameName());
 
             CreateGameResult createGameResult = new CreateGameResult(gameData.gameID());
             res.status(200);
             return new Gson().toJson(createGameResult);
         } catch (DataAccessException ex) {
-            res.status(401);
-            return "{ \"message\": \"Error: unauthorized\" }";
+            if (ex.getMessage().equals("invalid game name")) {
+                res.status(400);
+                return "{ \"message\": \"Error: bad request\" }";
+            } else if (ex.getMessage().equals("invalid auth token")) {
+                res.status(401);
+                return "{ \"message\": \"Error: unauthorized\" }";
+            } else {
+                res.status(500);
+                throw new ResponseException(500, ex.getMessage());
+            }
         } catch (Exception e) {
             res.status(500);
             throw new ResponseException(500, e.getMessage());
