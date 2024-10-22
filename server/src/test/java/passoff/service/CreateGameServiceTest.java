@@ -24,6 +24,7 @@ class CreateGameServiceTest {
         dataAccess = new MemoryDataAccess();
 
         validAuthData = new AuthData("testUser", "validAuthToken");
+        invalidAuthData = new AuthData("testUser", "invalidAuthToken");
 
         try {
             dataAccess.createAuth(validAuthData);
@@ -32,8 +33,6 @@ class CreateGameServiceTest {
         }
 
         createGameService = new CreateGameService(dataAccess);
-
-        invalidAuthData = new AuthData("testUser", "invalidAuthToken");
     }
 
     @Test
@@ -47,7 +46,7 @@ class CreateGameServiceTest {
     }
 
     @Test
-    void createGameFailureInvalidAuthToken() throws DataAccessException {
+    void createGameFailureInvalidAuthToken() {
         DataAccessException ex = assertThrows(DataAccessException.class, () -> {
             createGameService.createGame(invalidAuthData.authToken(), "invalid test game");
         });
@@ -56,7 +55,7 @@ class CreateGameServiceTest {
     }
 
     @Test
-    void createGameFailureNullAuthToken() throws DataAccessException {
+    void createGameFailureNullAuthToken() {
         DataAccessException ex = assertThrows(DataAccessException.class, () -> {
             createGameService.createGame(null, "null test game");
         });
@@ -65,7 +64,7 @@ class CreateGameServiceTest {
     }
 
     @Test
-    void createGameFailureEmptyGameName() throws DataAccessException {
+    void createGameFailureEmptyGameName() {
         DataAccessException ex = assertThrows(DataAccessException.class, () -> {
             createGameService.createGame("validAuthToken", "");
         });

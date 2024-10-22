@@ -20,7 +20,7 @@ public class JoinGameService {
 
         GameData gameData = dataAccess.getGame(gameID);
         if (gameData == null) {
-            throw new DataAccessException("invalid gameID");
+            throw new DataAccessException("invalid game id");
         }
 
         if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) {
@@ -28,10 +28,10 @@ public class JoinGameService {
         }
 
         if (playerColor.equals("WHITE") && gameData.whiteUsername() != null) {
-            throw new DataAccessException("white player slot already taken");
+            throw new DataAccessException("white player color already taken");
         }
         if (playerColor.equals("BLACK") && gameData.blackUsername() != null) {
-            throw new DataAccessException("black player slot already taken");
+            throw new DataAccessException("black player color already taken");
         }
 
         if (playerColor.equals("WHITE")) {

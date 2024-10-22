@@ -39,31 +39,31 @@ class ClearServiceTest {
             }
 
             @Override
-            public void createUser(UserData userData) throws DataAccessException {}
+            public void createUser(UserData userData) {}
 
             @Override
-            public UserData getUser(String username) throws DataAccessException { return null; }
+            public UserData getUser(String username) { return null; }
 
             @Override
-            public void createAuth(AuthData authData) throws DataAccessException {}
+            public void createAuth(AuthData authData) {}
 
             @Override
-            public AuthData getAuth(String authToken) throws DataAccessException { return null; }
+            public AuthData getAuth(String authToken) { return null; }
 
             @Override
-            public void deleteAuth(String authToken) throws DataAccessException {}
+            public void deleteAuth(String authToken) {}
 
             @Override
-            public List<GameData> listGames() throws DataAccessException { return null; }
+            public List<GameData> listGames() { return null; }
 
             @Override
-            public void createGame(GameData gameData) throws DataAccessException {}
+            public void createGame(GameData gameData) {}
 
             @Override
-            public GameData getGame(int gameID) throws DataAccessException { return null; }
+            public GameData getGame(int gameID) { return null; }
 
             @Override
-            public void updateGame(GameData gameData) throws DataAccessException {}
+            public void updateGame(GameData gameData) {}
         };
 
         ClearService faultyClearService = new ClearService(faultyDataAccess);

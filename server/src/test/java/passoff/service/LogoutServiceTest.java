@@ -22,6 +22,7 @@ class LogoutServiceTest {
         dataAccess = new MemoryDataAccess();
 
         validAuthData = new AuthData("testUser", "validAuthToken");
+        invalidAuthData = new AuthData("testUser", "invalidAuthToken");
 
         try {
             dataAccess.createAuth(validAuthData);
@@ -30,8 +31,6 @@ class LogoutServiceTest {
         }
 
         logoutService = new LogoutService(dataAccess);
-
-        invalidAuthData = new AuthData("testUser", "invalidAuthToken");
     }
 
     @Test
