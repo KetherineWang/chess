@@ -40,7 +40,8 @@ class CreateGameServiceTest {
         GameData gameData = createGameService.createGame(validAuthData.authToken(), "valid test game");
 
         assertNotNull(gameData, "game data should not be null");
-        assertEquals("testUser", gameData.whiteUsername(), "white username should match");
+        assertNull(gameData.whiteUsername(), "white username should be null");
+        assertNull(gameData.blackUsername(), "black username should be null");
         assertEquals("valid test game", gameData.gameName(), "game name should match");
         assertNotNull(gameData.gameID(), "game id should be generated");
     }
