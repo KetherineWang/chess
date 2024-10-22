@@ -58,6 +58,12 @@ class ClearServiceTest {
 
             @Override
             public void createGame(GameData gameData) throws DataAccessException {}
+
+            @Override
+            public GameData getGame(int gameID) throws DataAccessException { return null; }
+
+            @Override
+            public void updateGame(GameData gameData) throws DataAccessException {}
         };
 
         ClearService faultyClearService = new ClearService(faultyDataAccess);

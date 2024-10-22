@@ -14,7 +14,6 @@ public class LoginService {
 
     public AuthData login(String username, String password) throws DataAccessException {
         UserData userData = dataAccess.getUser(username);
-
         if (userData == null || !userData.password().equals(password)) {
             throw new DataAccessException("invalid username or password");
         }

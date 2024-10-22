@@ -15,7 +15,6 @@ public class CreateGameService {
 
     public GameData createGame(String authToken, String gameName) throws DataAccessException {
         AuthData authData = dataAccess.getAuth(authToken);
-
         if (authData == null) {
             throw new DataAccessException("invalid auth token");
         }
@@ -24,13 +23,13 @@ public class CreateGameService {
             throw new DataAccessException("invalid game name");
         }
 
-        GameData gameData = new GameData(generateGameID(), authData.username(), null, gameName, new ChessGame());
+        GameData gameData = new GameData(generateGameID(), null, null, gameName, new ChessGame());
         dataAccess.createGame(gameData);
 
         return gameData;
     }
 
     private int generateGameID() {
-        return (int) (Math.random() * 100000);
+        return (int) (Math.random() * 99999) + 1;
     }
 }

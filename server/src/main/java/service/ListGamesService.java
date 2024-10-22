@@ -16,7 +16,6 @@ public class ListGamesService {
 
     public List<GameData> listGames(String authToken) throws DataAccessException {
         AuthData authData = dataAccess.getAuth(authToken);
-
         if (authData == null) {
             throw new DataAccessException("invalid auth token");
         }

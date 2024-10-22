@@ -21,6 +21,7 @@ public class Server {
     private final LogoutService logoutService;
     private final ListGamesService listGamesService;
     private final CreateGameService createGameService;
+    private final JoinGameService joinGameService;
 
     public Server() {
         this.dataAccess = new MemoryDataAccess();
@@ -30,6 +31,7 @@ public class Server {
         this.logoutService = new LogoutService(dataAccess);
         this.listGamesService = new ListGamesService(dataAccess);
         this.createGameService = new CreateGameService(dataAccess);
+        this.joinGameService = new JoinGameService(dataAccess);
     }
 
     public int run(int desiredPort) {
@@ -44,6 +46,7 @@ public class Server {
         Spark.delete("/session", this::logoutUser);
         Spark.get("/game", this::listGames);
         Spark.post("/game", this::createGame);
+        Spark.put("/game", this::joinGame);
 
         Spark.exception(ResponseException.class, this::exceptionHandler);
 
@@ -73,7 +76,6 @@ public class Server {
     private Object registerUser(Request req, Response res) throws ResponseException {
         try {
             RegisterRequest registerRequest = new Gson().fromJson(req.body(), RegisterRequest.class);
-
             if (registerRequest.username() == null || registerRequest.username().isEmpty() ||
                 registerRequest.password() == null || registerRequest.password().isEmpty() ||
                 registerRequest.email() == null || registerRequest.email().isEmpty()) {
@@ -118,7 +120,6 @@ public class Server {
     private Object logoutUser(Request req, Response res) throws ResponseException {
         try {
             String authToken = req.headers("authorization");
-
             if (authToken == null || authToken.isEmpty()) {
                 res.status(401);
                 return "{ \"message\": \"Error: unauthorized\" }";
@@ -139,7 +140,6 @@ public class Server {
     private Object listGames(Request req, Response res) throws ResponseException {
         try {
             String authToken = req.headers("authorization");
-
             if (authToken == null || authToken.isEmpty()) {
                 res.status(401);
                 return "{ \"message\": \"Error: unauthorized\" }";
@@ -160,14 +160,12 @@ public class Server {
     private Object createGame(Request req, Response res) throws ResponseException {
         try {
             String authToken = req.headers("authorization");
-
             if (authToken == null || authToken.isEmpty()) {
                 res.status(401);
                 return "{ \"message\": \"Error: unauthorized\" }";
             }
 
             CreateGameRequest createGameRequest = new Gson().fromJson(req.body(), CreateGameRequest.class);
-
             if (createGameRequest.gameName() == null || createGameRequest.gameName().isEmpty()) {
                 res.status(400);
                 return "{ \"message\": \"Error: bad request\" }";
@@ -188,6 +186,40 @@ public class Server {
             } else {
                 res.status(500);
                 throw new ResponseException(500, ex.getMessage());
+            }
+        } catch (Exception e) {
+            res.status(500);
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
+
+    private Object joinGame(Request req, Response res) throws ResponseException {
+        try {
+            String authToken = req.headers("authorization");
+            if (authToken == null || authToken.isEmpty()) {
+                res.status(401);
+                return "{ \"message\": \"Error: unauthorized\" }";
+            }
+
+            JoinGameRequest joinGameRequest = new Gson().fromJson(req.body(), JoinGameRequest.class);
+            if (joinGameRequest.gameID() == 0 || joinGameRequest.playerColor() == null || joinGameRequest.playerColor().isEmpty()) {
+                res.status(400);
+                return "{ \"message\": \"Error: bad request\" }";
+            }
+
+            joinGameService.joinGame(authToken, joinGameRequest.gameID(), joinGameRequest.playerColor());
+            res.status(200);
+            return "{}";
+        } catch (DataAccessException ex) {
+            if (ex.getMessage().equals("invalid auth token")) {
+                res.status(401);
+                return "{ \"message\": \"Error: unauthorized\" }";
+            } else if (ex.getMessage().contains("already taken")) {
+                res.status(403);
+                return "{ \"message\": \"Error: already taken\" }";
+            } else {
+                res.status(400);
+                return "{ \"message\": \"Error: bad request\" }";
             }
         } catch (Exception e) {
             res.status(500);
