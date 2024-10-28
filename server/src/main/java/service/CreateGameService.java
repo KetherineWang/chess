@@ -16,11 +16,11 @@ public class CreateGameService {
     public GameData createGame(String authToken, String gameName) throws DataAccessException {
         AuthData authData = dataAccess.getAuth(authToken);
         if (authData == null) {
-            throw new DataAccessException("invalid auth token");
+            throw new DataAccessException("Invalid authToken");
         }
 
         if (gameName == null || gameName.isEmpty()) {
-            throw new DataAccessException("invalid game name");
+            throw new DataAccessException("Invalid gameName");
         }
 
         GameData gameData = new GameData(generateGameID(), null, null, gameName, new ChessGame());

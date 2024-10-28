@@ -1,6 +1,5 @@
 package service;
 
-import service.ClearService;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import dataaccess.DataAccessException;

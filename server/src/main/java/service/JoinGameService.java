@@ -12,26 +12,26 @@ public class JoinGameService {
         this.dataAccess = dataAccess;
     }
 
-    public void joinGame(String authToken, int gameID, String playerColor) throws DataAccessException {
+    public void joinGame(String authToken, int gameId, String playerColor) throws DataAccessException {
         AuthData authData = dataAccess.getAuth(authToken);
         if (authData == null) {
-            throw new DataAccessException("invalid auth token");
+            throw new DataAccessException("Invalid authToken");
         }
 
-        GameData gameData = dataAccess.getGame(gameID);
+        GameData gameData = dataAccess.getGame(gameId);
         if (gameData == null) {
-            throw new DataAccessException("invalid game id");
+            throw new DataAccessException("Game not found.");
         }
 
         if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) {
-            throw new DataAccessException("invalid player color");
+            throw new DataAccessException("Invalid playerColor");
         }
 
         if (playerColor.equals("WHITE") && gameData.whiteUsername() != null) {
-            throw new DataAccessException("white player color already taken");
+            throw new DataAccessException("WHITE playerColor already taken.");
         }
         if (playerColor.equals("BLACK") && gameData.blackUsername() != null) {
-            throw new DataAccessException("black player color already taken");
+            throw new DataAccessException("BLACK playerColor already taken.");
         }
 
         if (playerColor.equals("WHITE")) {

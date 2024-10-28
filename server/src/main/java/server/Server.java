@@ -177,10 +177,10 @@ public class Server {
             res.status(200);
             return new Gson().toJson(createGameResult);
         } catch (DataAccessException ex) {
-            if (ex.getMessage().equals("invalid game name")) {
+            if (ex.getMessage().equals("Invalid gameName")) {
                 res.status(400);
                 return "{ \"message\": \"Error: bad request\" }";
-            } else if (ex.getMessage().equals("invalid auth token")) {
+            } else if (ex.getMessage().equals("Invalid authToken")) {
                 res.status(401);
                 return "{ \"message\": \"Error: unauthorized\" }";
             } else {
@@ -211,7 +211,7 @@ public class Server {
             res.status(200);
             return "{}";
         } catch (DataAccessException ex) {
-            if (ex.getMessage().equals("invalid auth token")) {
+            if (ex.getMessage().equals("Invalid authToken")) {
                 res.status(401);
                 return "{ \"message\": \"Error: unauthorized\" }";
             } else if (ex.getMessage().contains("already taken")) {

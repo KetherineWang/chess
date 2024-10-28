@@ -52,7 +52,7 @@ class CreateGameServiceTest {
             createGameService.createGame(invalidAuthData.authToken(), "invalid test game");
         });
 
-        assertEquals("invalid auth token", ex.getMessage());
+        assertEquals("Invalid authToken", ex.getMessage());
     }
 
     @Test
@@ -61,7 +61,7 @@ class CreateGameServiceTest {
             createGameService.createGame(null, "null test game");
         });
 
-        assertEquals("invalid auth token", ex.getMessage());
+        assertEquals("Invalid authToken", ex.getMessage());
     }
 
     @Test
@@ -70,6 +70,6 @@ class CreateGameServiceTest {
             createGameService.createGame("validAuthToken", "");
         });
 
-        assertEquals("invalid game name", ex.getMessage());
+        assertEquals("Invalid gameName", ex.getMessage());
     }
 }

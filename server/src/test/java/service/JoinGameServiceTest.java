@@ -34,7 +34,7 @@ class JoinGameServiceTest {
             dataAccess.createAuth(validAuthDataBlack);
             dataAccess.createGame(new GameData(1, null, null, "test game", new ChessGame()));
         } catch (DataAccessException ex) {
-            fail("initial auth and game creation should not fail");
+            fail("Initial auth and game creation should not fail.");
         }
 
         joinGameService = new JoinGameService(dataAccess);
@@ -45,9 +45,9 @@ class JoinGameServiceTest {
         joinGameService.joinGame(validAuthDataBlack.authToken(), 1, "BLACK");
 
         GameData updatedGameData = dataAccess.getGame(1);
-        assertNotNull(updatedGameData, "game data should not be null");
-        assertNull(updatedGameData.whiteUsername(), "white player should be null");
-        assertEquals("blackPlayer", updatedGameData.blackUsername(), "black player should be set to blackTestUser");
+        assertNotNull(updatedGameData, "updatedGameData should not be null after first player joins.");
+        assertEquals("blackPlayer", updatedGameData.blackUsername(), "blackUsername should be set to blackPlayer.");
+        assertNull(updatedGameData.whiteUsername(), "whiteUsername should still be null.");
     }
 
     @Test
@@ -55,16 +55,16 @@ class JoinGameServiceTest {
         joinGameService.joinGame(validAuthDataWhite.authToken(), 1, "WHITE");
 
         GameData updatedGameData = dataAccess.getGame(1);
-        assertNotNull(updatedGameData, "game data should not be null after first player joins");
-        assertNull(updatedGameData.blackUsername(), "black player should still be null");
-        assertEquals("whitePlayer", updatedGameData.whiteUsername(), "white player should be set to whitePlayer");
+        assertNotNull(updatedGameData, "updatedGameData should not be null after first player joins.");
+        assertEquals("whitePlayer", updatedGameData.whiteUsername(), "whiteUsername should be set to whitePlayer.");
+        assertNull(updatedGameData.blackUsername(), "blackUsername should still be null.");
 
         joinGameService.joinGame(validAuthDataBlack.authToken(), 1, "BLACK");
 
         updatedGameData = dataAccess.getGame(1);
-        assertNotNull(updatedGameData, "game data should not be null after second player joins");
-        assertEquals("whitePlayer", updatedGameData.whiteUsername(), "white player should still be whitePlayer");
-        assertEquals("blackPlayer", updatedGameData.blackUsername(), "black player should be set to blackPlayer");
+        assertNotNull(updatedGameData, "updatedGameData should not be null after second player joins.");
+        assertEquals("whitePlayer", updatedGameData.whiteUsername(), "whiteUsername should still be whitePlayer.");
+        assertEquals("blackPlayer", updatedGameData.blackUsername(), "blackUsername should be set to blackPlayer.");
     }
 
     @Test
@@ -73,7 +73,7 @@ class JoinGameServiceTest {
             joinGameService.joinGame(invalidAuthDataWhite.authToken(), 1, "WHITE");
         });
 
-        assertEquals("invalid auth token", ex.getMessage());
+        assertEquals("Invalid authToken", ex.getMessage());
     }
 
     @Test
@@ -82,7 +82,7 @@ class JoinGameServiceTest {
             joinGameService.joinGame(validAuthDataBlack.authToken(), 2, "BLACK");
         });
 
-        assertEquals("invalid game id", ex.getMessage());
+        assertEquals("Game not found.", ex.getMessage());
     }
 
     @Test
@@ -91,7 +91,7 @@ class JoinGameServiceTest {
             joinGameService.joinGame(validAuthDataWhite.authToken(), 1, "GREY");
         });
 
-        assertEquals("invalid player color", ex.getMessage());
+        assertEquals("Invalid playerColor", ex.getMessage());
     }
 
     @Test
@@ -102,6 +102,6 @@ class JoinGameServiceTest {
             joinGameService.joinGame(validAuthDataBlack.authToken(), 1, "BLACK");
         });
 
-        assertEquals("black player color already taken", ex.getMessage());
+        assertEquals("BLACK playerColor already taken.", ex.getMessage());
     }
 }
