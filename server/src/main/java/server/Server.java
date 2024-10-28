@@ -3,6 +3,7 @@ package server;
 import service.*;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
+import dataaccess.MySqlDataAccess;
 import dataaccess.DataAccessException;
 import model.*;
 
@@ -24,7 +25,12 @@ public class Server {
     private final JoinGameService joinGameService;
 
     public Server() {
-        this.dataAccess = new MemoryDataAccess();
+        try {
+            this.dataAccess = new MySqlDataAccess();
+        } catch (DataAccessException ex) {
+            throw new RuntimeException("Failed to initialize the MySQL data access", ex);
+        }
+
         this.clearService = new ClearService(dataAccess);
         this.registerService = new RegisterService(dataAccess);
         this.loginService = new LoginService(dataAccess);
