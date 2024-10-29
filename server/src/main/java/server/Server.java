@@ -7,6 +7,7 @@ import dataaccess.GameDAO;
 import dataaccess.MemoryUserDAO;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.MemoryGameDAO;
+import dataaccess.DatabaseInitializer;
 import dataaccess.DataAccessException;
 import model.*;
 
@@ -30,11 +31,12 @@ public class Server {
     private final JoinGameService joinGameService;
 
     public Server() {
-//        try {
-//            this.dataAccess = new MySQLDataAccess();
-//        } catch (DataAccessException ex) {
-//            throw new RuntimeException("Failed to initialize the MySQL data access", ex);
-//        }
+        try {
+            DatabaseInitializer.configureDatabase();
+        } catch (DataAccessException ex) {
+            throw new RuntimeException("Unable to configure the database", ex);
+        }
+
         this.userDAO = new MemoryUserDAO();
         this.authDAO = new MemoryAuthDAO();
         this.gameDAO = new MemoryGameDAO();
