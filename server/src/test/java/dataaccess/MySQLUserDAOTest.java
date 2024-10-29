@@ -57,6 +57,9 @@ class MySQLUserDAOTest {
     @Test
     @DisplayName("Negative test case for getUser - User not found")
     void getUserFailureNotFound() throws DataAccessException {
+        UserData existingUser = new UserData("existingUser", "password789", "existingUser@email.com");
+        mySQLUserDAO.createUser(existingUser);
+
         UserData retrievedNonExistingUser = mySQLUserDAO.getUser("nonExistingUser");
         assertNull(retrievedNonExistingUser, "Retrieved non existing user should be null.");
     }

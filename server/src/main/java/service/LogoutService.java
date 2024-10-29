@@ -14,7 +14,7 @@ public class LogoutService {
     public void logout(String authToken) throws DataAccessException {
         AuthData authData = authDAO.getAuth(authToken);
         if (authData == null) {
-            throw new DataAccessException("invalid auth token");
+            throw new DataAccessException("Invalid auth token.");
         }
 
         authDAO.deleteAuth(authToken);

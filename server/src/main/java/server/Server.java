@@ -7,6 +7,8 @@ import dataaccess.GameDAO;
 import dataaccess.MemoryUserDAO;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.MemoryGameDAO;
+import dataaccess.MySQLUserDAO;
+import dataaccess.MySQLAuthDAO;
 import dataaccess.DatabaseInitializer;
 import dataaccess.DataAccessException;
 import model.*;
@@ -37,8 +39,8 @@ public class Server {
             throw new RuntimeException("Unable to configure the database", ex);
         }
 
-        this.userDAO = new MemoryUserDAO();
-        this.authDAO = new MemoryAuthDAO();
+        this.userDAO = new MySQLUserDAO();
+        this.authDAO = new MySQLAuthDAO();
         this.gameDAO = new MemoryGameDAO();
         this.clearService = new ClearService(userDAO, authDAO, gameDAO);
         this.registerService = new RegisterService(userDAO, authDAO);
@@ -106,13 +108,8 @@ public class Server {
             res.status(200);
             return new Gson().toJson(registerResult);
         } catch (DataAccessException ex) {
-            if (ex.getMessage().contains("Username already exists.")) {
-                res.status(403);
-                return "{ \"message\": \"Error: already taken\" }";
-            } else {
-                res.status(500);
-                throw new ResponseException(500, ex.getMessage());
-            }
+            res.status(403);
+            return "{ \"message\": \"Error: already taken\" }";
         } catch (Exception e) {
             res.status(500);
             throw new ResponseException(500, e.getMessage());

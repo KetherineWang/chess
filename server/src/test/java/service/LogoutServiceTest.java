@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.AuthDAO;
 import dataaccess.MemoryAuthDAO;
+import dataaccess.MySQLAuthDAO;
 import dataaccess.DataAccessException;
 import model.AuthData;
 
@@ -17,8 +18,9 @@ class LogoutServiceTest {
     private AuthData invalidAuthData;
 
     @BeforeEach
-    void setUp() {
-        authDAO = new MemoryAuthDAO();
+    void setUp() throws DataAccessException {
+        authDAO = new MySQLAuthDAO();
+        authDAO.clear();
 
         validAuthData = new AuthData("testUser", "validAuthToken");
         invalidAuthData = new AuthData("testUser", "invalidAuthToken");
@@ -26,7 +28,7 @@ class LogoutServiceTest {
         try {
             authDAO.createAuth(validAuthData);
         } catch (DataAccessException ex) {
-            fail("initial auth creation should not fail");
+            fail("Initial auth creation should not fail.");
         }
 
         logoutService = new LogoutService(authDAO);
@@ -37,7 +39,7 @@ class LogoutServiceTest {
         logoutService.logout(validAuthData.authToken());
 
         AuthData authData = authDAO.getAuth(validAuthData.authToken());
-        assertNull(authData, "auth data should be null after successful logout");
+        assertNull(authData, "Auth data should be null after successful logout.");
     }
 
     @Test
@@ -46,7 +48,7 @@ class LogoutServiceTest {
             logoutService.logout(invalidAuthData.authToken());
         });
 
-        assertEquals("invalid auth token", ex.getMessage());
+        assertEquals("Invalid auth token.", ex.getMessage());
     }
 
     @Test
@@ -55,7 +57,7 @@ class LogoutServiceTest {
             logoutService.logout(null);
         });
 
-        assertEquals("invalid auth token", ex.getMessage());
+        assertEquals("Invalid auth token.", ex.getMessage());
     }
 
 }
