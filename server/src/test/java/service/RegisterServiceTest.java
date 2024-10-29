@@ -4,6 +4,7 @@ import dataaccess.UserDAO;
 import dataaccess.AuthDAO;
 import dataaccess.MemoryUserDAO;
 import dataaccess.MemoryAuthDAO;
+import dataaccess.MySQLUserDAO;
 import dataaccess.DataAccessException;
 import model.UserData;
 import model.AuthData;
@@ -49,6 +50,6 @@ class RegisterServiceTest {
             registerService.register(existingUser);
         });
 
-        assertEquals("username already exists", ex.getMessage());
+        assertEquals("Username already exists.", ex.getMessage());
     }
 }

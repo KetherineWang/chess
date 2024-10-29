@@ -106,8 +106,13 @@ public class Server {
             res.status(200);
             return new Gson().toJson(registerResult);
         } catch (DataAccessException ex) {
-            res.status(403);
-            return "{ \"message\": \"Error: already taken\" }";
+            if (ex.getMessage().contains("Username already exists.")) {
+                res.status(403);
+                return "{ \"message\": \"Error: already taken\" }";
+            } else {
+                res.status(500);
+                throw new ResponseException(500, ex.getMessage());
+            }
         } catch (Exception e) {
             res.status(500);
             throw new ResponseException(500, e.getMessage());

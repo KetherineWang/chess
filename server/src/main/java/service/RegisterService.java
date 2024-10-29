@@ -16,7 +16,7 @@ public class RegisterService {
 
     public AuthData register(UserData userData) throws DataAccessException {
         if (userDAO.getUser(userData.username()) != null) {
-            throw new DataAccessException("username already exists");
+            throw new DataAccessException("Username already exists.");
         }
 
         userDAO.createUser(userData);
