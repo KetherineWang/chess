@@ -1,20 +1,23 @@
 package service;
 
 import chess.ChessGame;
-import dataaccess.DataAccess;
+import dataaccess.AuthDAO;
+import dataaccess.GameDAO;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
 
 public class CreateGameService {
-    private final DataAccess dataAccess;
+    private final AuthDAO authDAO;
+    private final GameDAO gameDAO;
 
-    public CreateGameService(DataAccess dataAccess) {
-        this.dataAccess = dataAccess;
+    public CreateGameService(AuthDAO authDAO, GameDAO gameDAO) {
+        this.authDAO = authDAO;
+        this.gameDAO = gameDAO;
     }
 
     public GameData createGame(String authToken, String gameName) throws DataAccessException {
-        AuthData authData = dataAccess.getAuth(authToken);
+        AuthData authData = authDAO.getAuth(authToken);
         if (authData == null) {
             throw new DataAccessException("Invalid authToken");
         }
@@ -24,7 +27,7 @@ public class CreateGameService {
         }
 
         GameData gameData = new GameData(generateGameID(), null, null, gameName, new ChessGame());
-        dataAccess.createGame(gameData);
+        gameDAO.createGame(gameData);
 
         return gameData;
     }

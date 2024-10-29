@@ -1,73 +1,90 @@
+//package service;
+//
+//import dataaccess.UserDAO;
+//import dataaccess.AuthDAO;
+//import dataaccess.GameDAO;
+//import dataaccess.MemoryUserDAO;
+//import dataaccess.MemoryAuthDAO;
+//import dataaccess.MemoryGameDAO;
+//import dataaccess.DataAccessException;
+//
+//import org.junit.jupiter.api.BeforeEach;
+//import org.junit.jupiter.api.Test;
+//
+//import static org.junit.jupiter.api.Assertions.*;
+//
+//class ClearServiceTest {
+//    private UserDAO userDAO;
+//    private AuthDAO authDAO;
+//    private GameDAO gameDAO;
+//    private ClearService clearService;
+//
+//    @BeforeEach
+//    void setUp() throws DataAccessException {
+//        userDAO = new MemoryUserDAO();
+//        authDAO = new MemoryAuthDAO();
+//        gameDAO = new MemoryGameDAO();
+//        clearService = new ClearService(userDAO, authDAO, gameDAO);
+//    }
+//
+//    @Test
+//    void clearSuccess() {
+//        assertDoesNotThrow(() -> clearService.clear(), "clear() method threw an exception");
+//    }
+//}
 package service;
 
-import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
+import dataaccess.AuthDAO;
+import dataaccess.GameDAO;
+import dataaccess.UserDAO;
+import dataaccess.MemoryUserDAO;
+import dataaccess.MemoryAuthDAO;
+import dataaccess.MemoryGameDAO;
 import dataaccess.DataAccessException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import model.UserData;
 import model.AuthData;
 import model.GameData;
 
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class ClearServiceTest {
-    private DataAccess dataAccess;
+
     private ClearService clearService;
+    private UserDAO userDAO;
+    private AuthDAO authDAO;
+    private GameDAO gameDAO;
 
     @BeforeEach
-    void setUp() {
-        dataAccess = new MemoryDataAccess();
-        clearService = new ClearService(dataAccess);
+    void setUp() throws DataAccessException {
+        // Using memory-based DAOs for testing
+        userDAO = new MemoryUserDAO();
+        authDAO = new MemoryAuthDAO();
+        gameDAO = new MemoryGameDAO();
+
+        // Injecting into the ClearService
+        clearService = new ClearService(userDAO, authDAO, gameDAO);
+
+        // Add some initial data for the test
+        userDAO.createUser(new UserData("user1", "password1", "user1@example.com"));
+        authDAO.createAuth(new AuthData("user1", "authToken1"));
+        gameDAO.createGame(new GameData(1, "user1", "user2", "First Game", null));
     }
 
     @Test
-    void clearSuccess() {
+    void clearSuccess() throws DataAccessException{
+        // Ensure data exists before clearing
+        assertNotNull(userDAO.getUser("user1"), "User should exist before clear");
+        assertNotNull(authDAO.getAuth("authToken1"), "Auth token should exist before clear");
+        assertNotNull(gameDAO.getGame(1), "Game should exist before clear");
+
+        // Call the clear() method
         assertDoesNotThrow(() -> clearService.clear(), "clear() method threw an exception");
-    }
 
-    @Test
-    void clearFailure() {
-        DataAccess faultyDataAccess = new DataAccess() {
-            @Override
-            public void clear() throws DataAccessException {
-                throw new DataAccessException("clear_failure() test exception");
-            }
-
-            @Override
-            public void createUser(UserData userData) {}
-
-            @Override
-            public UserData getUser(String username) { return null; }
-
-            @Override
-            public void createAuth(AuthData authData) {}
-
-            @Override
-            public AuthData getAuth(String authToken) { return null; }
-
-            @Override
-            public void deleteAuth(String authToken) {}
-
-            @Override
-            public List<GameData> listGames() { return null; }
-
-            @Override
-            public void createGame(GameData gameData) {}
-
-            @Override
-            public GameData getGame(int gameID) { return null; }
-
-            @Override
-            public void updateGame(GameData gameData) {}
-        };
-
-        ClearService faultyClearService = new ClearService(faultyDataAccess);
-
-        DataAccessException ex = assertThrows(DataAccessException.class, faultyClearService::clear);
-        assertEquals("clear_failure() test exception", ex.getMessage());
+        // Assert that data has been cleared
+        assertNull(userDAO.getUser("user1"), "User should not exist after clear");
+        assertNull(authDAO.getAuth("authToken1"), "Auth token should not exist after clear");
+        assertNull(gameDAO.getGame(1), "Game should not exist after clear");
     }
 }

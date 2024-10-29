@@ -1,8 +1,9 @@
 package service;
 
-import service.RegisterService;
-import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
+import dataaccess.UserDAO;
+import dataaccess.AuthDAO;
+import dataaccess.MemoryUserDAO;
+import dataaccess.MemoryAuthDAO;
 import dataaccess.DataAccessException;
 import model.UserData;
 import model.AuthData;
@@ -13,13 +14,15 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RegisterServiceTest {
-    private DataAccess dataAccess;
+    private UserDAO userDAO;
+    private AuthDAO authDAO;
     private RegisterService registerService;
 
     @BeforeEach
     void setUp() {
-        dataAccess = new MemoryDataAccess();
-        registerService = new RegisterService(dataAccess);
+        userDAO = new MemoryUserDAO();
+        authDAO = new MemoryAuthDAO();
+        registerService = new RegisterService(userDAO, authDAO);
     }
 
     @Test

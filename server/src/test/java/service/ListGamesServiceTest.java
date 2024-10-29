@@ -1,9 +1,10 @@
 package service;
 
 import chess.ChessGame;
-import service.ListGamesService;
-import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
+import dataaccess.AuthDAO;
+import dataaccess.GameDAO;
+import dataaccess.MemoryAuthDAO;
+import dataaccess.MemoryGameDAO;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
@@ -16,32 +17,34 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ListGamesServiceTest {
-    private DataAccess dataAccess;
+    private AuthDAO authDAO;
+    private GameDAO gameDAO;
     private ListGamesService listGamesService;
     private AuthData validAuthData;
     private AuthData invalidAuthData;
 
     @BeforeEach
     void setUp() {
-        dataAccess = new MemoryDataAccess();
+        authDAO = new MemoryAuthDAO();
+        gameDAO = new MemoryGameDAO();
 
         validAuthData = new AuthData("testUser", "validAuthToken");
         invalidAuthData = new AuthData("testUser", "invalidAuthToken");
 
         try {
-            dataAccess.createAuth(validAuthData);
+            authDAO.createAuth(validAuthData);
         } catch (DataAccessException ex) {
             fail("initial auth creation should not fail");
         }
 
         try {
-            dataAccess.createGame(new GameData(1, "testUser", "opponentUser", "First Game", new ChessGame()));
-            dataAccess.createGame(new GameData(2, "testUser", null, "Second Game", new ChessGame()));
+            gameDAO.createGame(new GameData(1, "testUser", "opponentUser", "First Game", new ChessGame()));
+            gameDAO.createGame(new GameData(2, "testUser", null, "Second Game", new ChessGame()));
         } catch (DataAccessException ex) {
             fail("initial game creation should not fail");
         }
 
-        listGamesService = new ListGamesService(dataAccess);
+        listGamesService = new ListGamesService(authDAO, gameDAO);
     }
 
     @Test

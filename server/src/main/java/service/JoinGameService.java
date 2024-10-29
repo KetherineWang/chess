@@ -1,24 +1,27 @@
 package service;
 
-import dataaccess.DataAccess;
+import dataaccess.AuthDAO;
+import dataaccess.GameDAO;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
 
 public class JoinGameService {
-    private final DataAccess dataAccess;
+    private final AuthDAO authDAO;
+    private final GameDAO gameDAO;
 
-    public JoinGameService(DataAccess dataAccess) {
-        this.dataAccess = dataAccess;
+    public JoinGameService(AuthDAO authDAO, GameDAO gameDAO) {
+        this.authDAO = authDAO;
+        this.gameDAO = gameDAO;
     }
 
     public void joinGame(String authToken, int gameId, String playerColor) throws DataAccessException {
-        AuthData authData = dataAccess.getAuth(authToken);
+        AuthData authData = authDAO.getAuth(authToken);
         if (authData == null) {
             throw new DataAccessException("Invalid authToken");
         }
 
-        GameData gameData = dataAccess.getGame(gameId);
+        GameData gameData = gameDAO.getGame(gameId);
         if (gameData == null) {
             throw new DataAccessException("Game not found.");
         }
@@ -40,6 +43,6 @@ public class JoinGameService {
             gameData = new GameData(gameData.gameID(), gameData.whiteUsername(), authData.username(), gameData.gameName(), gameData.chessGame());
         }
 
-        dataAccess.updateGame(gameData);
+        gameDAO.updateGame(gameData);
     }
 }

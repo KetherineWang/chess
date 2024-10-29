@@ -4,19 +4,31 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
-public class MySqlDataAccess implements DataAccess {
-    public MySqlDataAccess() throws DataAccessException {
+public class MySQLDataAccess implements DataAccess {
+    public MySQLDataAccess() throws DataAccessException {
         configureDatabase();
     }
 
     @Override
     public void clear() throws DataAccessException {
-        throw new DataAccessException("clear_failure() test exception");
+        String[] clearStatements = {
+            "DELETE FROM user",
+            "DELETE FROM auth",
+            "DELETE FROM game"
+        };
+
+        try (var conn = DatabaseManager.getConnection()) {
+            for (var statement : clearStatements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("unable to clear database: " + ex.getMessage());
+        }
     }
 
     @Override
@@ -86,7 +98,7 @@ public class MySqlDataAccess implements DataAccess {
                 }
             }
         } catch (SQLException ex) {
-            throw new DataAccessException("Unable to configure database and create tables.");
+            throw new DataAccessException("Unable to configure database and create tables: " + ex.getMessage());
         }
     }
 }

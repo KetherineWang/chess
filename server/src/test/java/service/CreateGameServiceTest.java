@@ -1,9 +1,9 @@
 package service;
 
-import chess.ChessGame;
-import service.CreateGameService;
-import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
+import dataaccess.AuthDAO;
+import dataaccess.GameDAO;
+import dataaccess.MemoryAuthDAO;
+import dataaccess.MemoryGameDAO;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
@@ -14,25 +14,27 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CreateGameServiceTest {
-    private DataAccess dataAccess;
+    private AuthDAO authDAO;
+    private GameDAO gameDAO;
     private CreateGameService createGameService;
     private AuthData validAuthData;
     private AuthData invalidAuthData;
 
     @BeforeEach
     void setUp() {
-        dataAccess = new MemoryDataAccess();
+        authDAO = new MemoryAuthDAO();
+        gameDAO = new MemoryGameDAO();
 
         validAuthData = new AuthData("testUser", "validAuthToken");
         invalidAuthData = new AuthData("testUser", "invalidAuthToken");
 
         try {
-            dataAccess.createAuth(validAuthData);
+            authDAO.createAuth(validAuthData);
         } catch (DataAccessException ex) {
             fail("initial auth creation should not fail");
         }
 
-        createGameService = new CreateGameService(dataAccess);
+        createGameService = new CreateGameService(authDAO, gameDAO);
     }
 
     @Test

@@ -1,9 +1,12 @@
 package server;
 
 import service.*;
-import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
-import dataaccess.MySqlDataAccess;
+import dataaccess.UserDAO;
+import dataaccess.AuthDAO;
+import dataaccess.GameDAO;
+import dataaccess.MemoryUserDAO;
+import dataaccess.MemoryAuthDAO;
+import dataaccess.MemoryGameDAO;
 import dataaccess.DataAccessException;
 import model.*;
 
@@ -15,7 +18,9 @@ import com.google.gson.Gson;
 import exception.ResponseException;
 
 public class Server {
-    private final DataAccess dataAccess;
+    private final UserDAO userDAO;
+    private final AuthDAO authDAO;
+    private final GameDAO gameDAO;
     private final ClearService clearService;
     private final RegisterService registerService;
     private final LoginService loginService;
@@ -25,19 +30,21 @@ public class Server {
     private final JoinGameService joinGameService;
 
     public Server() {
-        try {
-            this.dataAccess = new MySqlDataAccess();
-        } catch (DataAccessException ex) {
-            throw new RuntimeException("Failed to initialize the MySQL data access", ex);
-        }
-
-        this.clearService = new ClearService(dataAccess);
-        this.registerService = new RegisterService(dataAccess);
-        this.loginService = new LoginService(dataAccess);
-        this.logoutService = new LogoutService(dataAccess);
-        this.listGamesService = new ListGamesService(dataAccess);
-        this.createGameService = new CreateGameService(dataAccess);
-        this.joinGameService = new JoinGameService(dataAccess);
+//        try {
+//            this.dataAccess = new MySQLDataAccess();
+//        } catch (DataAccessException ex) {
+//            throw new RuntimeException("Failed to initialize the MySQL data access", ex);
+//        }
+        this.userDAO = new MemoryUserDAO();
+        this.authDAO = new MemoryAuthDAO();
+        this.gameDAO = new MemoryGameDAO();
+        this.clearService = new ClearService(userDAO, authDAO, gameDAO);
+        this.registerService = new RegisterService(userDAO, authDAO);
+        this.loginService = new LoginService(userDAO, authDAO);
+        this.logoutService = new LogoutService(authDAO);
+        this.listGamesService = new ListGamesService(authDAO, gameDAO);
+        this.createGameService = new CreateGameService(authDAO, gameDAO);
+        this.joinGameService = new JoinGameService(authDAO, gameDAO);
     }
 
     public int run(int desiredPort) {

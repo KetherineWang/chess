@@ -1,22 +1,22 @@
 package service;
 
-import dataaccess.DataAccess;
+import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import model.AuthData;
 
 public class LogoutService {
-    private final DataAccess dataAccess;
+    private final AuthDAO authDAO;
 
-    public LogoutService(DataAccess dataAccess) {
-        this.dataAccess = dataAccess;
+    public LogoutService(AuthDAO authDAO) {
+        this.authDAO = authDAO;
     }
 
     public void logout(String authToken) throws DataAccessException {
-        AuthData authData = dataAccess.getAuth(authToken);
+        AuthData authData = authDAO.getAuth(authToken);
         if (authData == null) {
             throw new DataAccessException("invalid auth token");
         }
 
-        dataAccess.deleteAuth(authToken);
+        authDAO.deleteAuth(authToken);
     }
 }

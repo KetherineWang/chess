@@ -1,9 +1,10 @@
 package service;
 
 import chess.ChessGame;
-import service.JoinGameService;
-import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
+import dataaccess.AuthDAO;
+import dataaccess.GameDAO;
+import dataaccess.MemoryAuthDAO;
+import dataaccess.MemoryGameDAO;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
@@ -14,7 +15,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JoinGameServiceTest {
-    private DataAccess dataAccess;
+    private AuthDAO authDAO;
+    private GameDAO gameDAO;
     private JoinGameService joinGameService;
     private AuthData validAuthDataWhite;
     private AuthData validAuthDataBlack;
@@ -23,28 +25,29 @@ class JoinGameServiceTest {
 
     @BeforeEach
     void setUp() {
-        dataAccess = new MemoryDataAccess();
+        authDAO = new MemoryAuthDAO();
+        gameDAO = new MemoryGameDAO();
 
         validAuthDataWhite = new AuthData("whitePlayer", "validAuthTokenWhite");
         validAuthDataBlack = new AuthData("blackPlayer", "validAuthTokenBlack");
         invalidAuthDataWhite = new AuthData("whitePlayer", "invalidAuthTokenWhite");
 
         try {
-            dataAccess.createAuth(validAuthDataWhite);
-            dataAccess.createAuth(validAuthDataBlack);
-            dataAccess.createGame(new GameData(1, null, null, "test game", new ChessGame()));
+            authDAO.createAuth(validAuthDataWhite);
+            authDAO.createAuth(validAuthDataBlack);
+            gameDAO.createGame(new GameData(1, null, null, "test game", new ChessGame()));
         } catch (DataAccessException ex) {
             fail("Initial auth and game creation should not fail.");
         }
 
-        joinGameService = new JoinGameService(dataAccess);
+        joinGameService = new JoinGameService(authDAO, gameDAO);
     }
 
     @Test
     void joinGameSuccessOnePlayer() throws DataAccessException {
         joinGameService.joinGame(validAuthDataBlack.authToken(), 1, "BLACK");
 
-        GameData updatedGameData = dataAccess.getGame(1);
+        GameData updatedGameData = gameDAO.getGame(1);
         assertNotNull(updatedGameData, "updatedGameData should not be null after first player joins.");
         assertEquals("blackPlayer", updatedGameData.blackUsername(), "blackUsername should be set to blackPlayer.");
         assertNull(updatedGameData.whiteUsername(), "whiteUsername should still be null.");
@@ -54,14 +57,14 @@ class JoinGameServiceTest {
     void joinGameSuccessTwoPlayers() throws DataAccessException {
         joinGameService.joinGame(validAuthDataWhite.authToken(), 1, "WHITE");
 
-        GameData updatedGameData = dataAccess.getGame(1);
+        GameData updatedGameData = gameDAO.getGame(1);
         assertNotNull(updatedGameData, "updatedGameData should not be null after first player joins.");
         assertEquals("whitePlayer", updatedGameData.whiteUsername(), "whiteUsername should be set to whitePlayer.");
         assertNull(updatedGameData.blackUsername(), "blackUsername should still be null.");
 
         joinGameService.joinGame(validAuthDataBlack.authToken(), 1, "BLACK");
 
-        updatedGameData = dataAccess.getGame(1);
+        updatedGameData = gameDAO.getGame(1);
         assertNotNull(updatedGameData, "updatedGameData should not be null after second player joins.");
         assertEquals("whitePlayer", updatedGameData.whiteUsername(), "whiteUsername should still be whitePlayer.");
         assertEquals("blackPlayer", updatedGameData.blackUsername(), "blackUsername should be set to blackPlayer.");

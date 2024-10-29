@@ -1,26 +1,28 @@
 package service;
 
-import dataaccess.DataAccess;
+import dataaccess.UserDAO;
+import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import model.UserData;
 import model.AuthData;
 
 public class RegisterService {
-    private final DataAccess dataAccess;
+    private final UserDAO userDAO;
+    private final AuthDAO authDAO;
 
-    public RegisterService(DataAccess dataAccess) {
-        this.dataAccess = dataAccess;
-    }
+    public RegisterService(UserDAO userDAO, AuthDAO authDAO) {
+        this.userDAO = userDAO;
+        this.authDAO = authDAO;    }
 
     public AuthData register(UserData userData) throws DataAccessException {
-        if (dataAccess.getUser(userData.username()) != null) {
+        if (userDAO.getUser(userData.username()) != null) {
             throw new DataAccessException("username already exists");
         }
 
-        dataAccess.createUser(userData);
+        userDAO.createUser(userData);
 
         AuthData authData = new AuthData(userData.username(), generateAuthToken());
-        dataAccess.createAuth(authData);
+        authDAO.createAuth(authData);
 
         return authData;
     }

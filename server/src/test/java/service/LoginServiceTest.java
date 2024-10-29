@@ -1,8 +1,9 @@
 package service;
 
-import service.LoginService;
-import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
+import dataaccess.UserDAO;
+import dataaccess.AuthDAO;
+import dataaccess.MemoryUserDAO;
+import dataaccess.MemoryAuthDAO;
 import dataaccess.DataAccessException;
 import model.UserData;
 import model.AuthData;
@@ -13,22 +14,24 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LoginServiceTest {
-    private DataAccess dataAccess;
+    private UserDAO userDAO;
+    private AuthDAO authDAO;
     private LoginService loginService;
 
     @BeforeEach
     void setUp() {
-        dataAccess = new MemoryDataAccess();
+        userDAO = new MemoryUserDAO();
+        authDAO = new MemoryAuthDAO();
 
         UserData testUser = new UserData("testUser", "password123", "testuser@email.com");
 
         try {
-            dataAccess.createUser(testUser);
+            userDAO.createUser(testUser);
         } catch (DataAccessException ex) {
             fail("initial user creation should not fail");
         }
 
-        loginService = new LoginService(dataAccess);
+        loginService = new LoginService(userDAO, authDAO);
     }
 
     @Test
