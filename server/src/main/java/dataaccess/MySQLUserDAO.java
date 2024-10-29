@@ -3,7 +3,6 @@ package dataaccess;
 import model.UserData;
 
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 
 public class MySQLUserDAO implements UserDAO {
     @Override

@@ -13,6 +13,14 @@ public class DatabaseInitializer {
            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
            """,
            """
+           CREATE TABLE IF NOT EXISTS auth (
+               `username` VARCHAR(255) NOT NULL,
+               `authToken` VARCHAR(255) NOT NULL,
+               PRIMARY KEY (`authToken`),
+               FOREIGN KEY (`username`) REFERENCES user(`username`) ON DELETE CASCADE
+           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+           """,
+           """
            CREATE TABLE IF NOT EXISTS game (
                `gameID` INT AUTO_INCREMENT NOT NULL,
                `whiteUsername` VARCHAR(255),
@@ -22,14 +30,6 @@ public class DatabaseInitializer {
                PRIMARY KEY (`gameID`),
                FOREIGN KEY (`whiteUsername`) REFERENCES user(`username`) ON DELETE SET NULL,
                FOREIGN KEY (`blackUsername`) REFERENCES user(`username`) ON DELETE SET NULL
-           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-           """,
-           """
-           CREATE TABLE IF NOT EXISTS auth (
-               `authToken` VARCHAR(255) NOT NULL,
-               `username` VARCHAR(255) NOT NULL,
-               PRIMARY KEY (`authToken`),
-               FOREIGN KEY (`username`) REFERENCES user(`username`) ON DELETE CASCADE
            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
            """
     };
