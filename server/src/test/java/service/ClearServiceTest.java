@@ -1,37 +1,3 @@
-//package service;
-//
-//import dataaccess.UserDAO;
-//import dataaccess.AuthDAO;
-//import dataaccess.GameDAO;
-//import dataaccess.MemoryUserDAO;
-//import dataaccess.MemoryAuthDAO;
-//import dataaccess.MemoryGameDAO;
-//import dataaccess.DataAccessException;
-//
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//
-//import static org.junit.jupiter.api.Assertions.*;
-//
-//class ClearServiceTest {
-//    private UserDAO userDAO;
-//    private AuthDAO authDAO;
-//    private GameDAO gameDAO;
-//    private ClearService clearService;
-//
-//    @BeforeEach
-//    void setUp() throws DataAccessException {
-//        userDAO = new MemoryUserDAO();
-//        authDAO = new MemoryAuthDAO();
-//        gameDAO = new MemoryGameDAO();
-//        clearService = new ClearService(userDAO, authDAO, gameDAO);
-//    }
-//
-//    @Test
-//    void clearSuccess() {
-//        assertDoesNotThrow(() -> clearService.clear(), "clear() method threw an exception");
-//    }
-//}
 package service;
 
 import dataaccess.AuthDAO;

@@ -1,11 +1,14 @@
 package service;
 
+import dataaccess.UserDAO;
 import dataaccess.AuthDAO;
 import dataaccess.MemoryAuthDAO;
+import dataaccess.MySQLUserDAO;
 import dataaccess.MySQLAuthDAO;
 import dataaccess.DataAccessException;
 import model.AuthData;
 
+import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,17 +16,28 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class LogoutServiceTest {
     private AuthDAO authDAO;
+    private UserDAO userDAO;
     private LogoutService logoutService;
+    private UserData testUser;
     private AuthData validAuthData;
     private AuthData invalidAuthData;
 
     @BeforeEach
     void setUp() throws DataAccessException {
         authDAO = new MySQLAuthDAO();
+        userDAO = new MySQLUserDAO();
         authDAO.clear();
+        userDAO.clear();
 
+        testUser = new UserData("testUser", "password123", "testUser@email.com");
         validAuthData = new AuthData("testUser", "validAuthToken");
         invalidAuthData = new AuthData("testUser", "invalidAuthToken");
+
+        try {
+            userDAO.createUser(testUser);
+        } catch (DataAccessException ex) {
+            fail("Initial user creation should not fail.");
+        }
 
         try {
             authDAO.createAuth(validAuthData);
