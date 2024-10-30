@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class MySQLAuthDAO implements AuthDAO {
     @Override
     public void createAuth(AuthData authData) throws DataAccessException {
-        var statement = "INSERT INTO auth (username, authToken) VALUES(?, ?)";
+        var statement = "INSERT INTO auth (username, authToken) VALUES (?, ?)";
 
         try (var conn = DatabaseManager.getConnection();
              var preparedStatement = conn.prepareStatement(statement)) {
