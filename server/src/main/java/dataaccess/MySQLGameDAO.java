@@ -7,13 +7,12 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.google.gson.Gson;
 
-import javax.xml.crypto.Data;
 import java.util.List;
 import java.util.ArrayList;
 
 public class MySQLGameDAO implements GameDAO {
     @Override
-    public void createGame(GameData gameData) throws DataAccessException {
+    public int createGame(GameData gameData) throws DataAccessException {
         var statement = "INSERT INTO game (whiteUsername, blackUsername, gameName, chessGame) VALUES (?, ?, ?, ?)";
 
         try (var conn = DatabaseManager.getConnection();
@@ -29,6 +28,9 @@ public class MySQLGameDAO implements GameDAO {
                 if (rs.next()) {
                     int generatedGameID = rs.getInt(1);
                     System.out.println("Generated Game ID: " + generatedGameID);
+                    return generatedGameID;
+                } else {
+                    return 0;
                 }
             }
         } catch (SQLException ex) {

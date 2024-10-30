@@ -18,7 +18,7 @@ public class JoinGameService {
     public void joinGame(String authToken, int gameId, String playerColor) throws DataAccessException {
         AuthData authData = authDAO.getAuth(authToken);
         if (authData == null) {
-            throw new DataAccessException("Invalid authToken");
+            throw new DataAccessException("Invalid auth token.");
         }
 
         GameData gameData = gameDAO.getGame(gameId);
@@ -27,14 +27,14 @@ public class JoinGameService {
         }
 
         if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) {
-            throw new DataAccessException("Invalid playerColor");
+            throw new DataAccessException("Invalid player color.");
         }
 
         if (playerColor.equals("WHITE") && gameData.whiteUsername() != null) {
-            throw new DataAccessException("WHITE playerColor already taken.");
+            throw new DataAccessException("White player color already taken.");
         }
         if (playerColor.equals("BLACK") && gameData.blackUsername() != null) {
-            throw new DataAccessException("BLACK playerColor already taken.");
+            throw new DataAccessException("Black player color already taken.");
         }
 
         if (playerColor.equals("WHITE")) {

@@ -12,7 +12,8 @@ public class RegisterService {
 
     public RegisterService(UserDAO userDAO, AuthDAO authDAO) {
         this.userDAO = userDAO;
-        this.authDAO = authDAO;    }
+        this.authDAO = authDAO;
+    }
 
     public AuthData register(UserData userData) throws DataAccessException {
         if (userDAO.getUser(userData.username()) != null) {

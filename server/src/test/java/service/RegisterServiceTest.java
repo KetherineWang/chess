@@ -1,17 +1,10 @@
 package service;
 
-import dataaccess.UserDAO;
-import dataaccess.AuthDAO;
-import dataaccess.MemoryUserDAO;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MySQLUserDAO;
-import dataaccess.MySQLAuthDAO;
-import dataaccess.DataAccessException;
+import dataaccess.*;
 import model.UserData;
 import model.AuthData;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,14 +31,9 @@ class RegisterServiceTest {
     }
 
     @Test
-    void registerFailureUsernameAlreadyTaken() {
+    void registerFailureUsernameAlreadyTaken() throws DataAccessException {
         UserData existingUser = new UserData("existingUser", "password456", "existingUser@email.com");
-
-        try {
-            registerService.register(existingUser);
-        } catch (DataAccessException ex) {
-            fail("Initial user registration should not fail: " + ex.getMessage());
-        }
+        registerService.register(existingUser);
 
         DataAccessException ex = assertThrows(DataAccessException.class, () -> {
             registerService.register(existingUser);

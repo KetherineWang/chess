@@ -1,47 +1,60 @@
 package service;
 
 import chess.ChessGame;
-import dataaccess.AuthDAO;
-import dataaccess.GameDAO;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryGameDAO;
-import dataaccess.DataAccessException;
+import dataaccess.*;
+import model.UserData;
 import model.AuthData;
 import model.GameData;
 
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
+
 class ListGamesServiceTest {
+    private UserDAO userDAO;
     private AuthDAO authDAO;
     private GameDAO gameDAO;
     private ListGamesService listGamesService;
+    private UserData testUser;
+    private UserData opponentTestUser;
     private AuthData validAuthData;
     private AuthData invalidAuthData;
 
     @BeforeEach
-    void setUp() {
-        authDAO = new MemoryAuthDAO();
-        gameDAO = new MemoryGameDAO();
+    void setUp() throws DataAccessException{
+        userDAO = new MySQLUserDAO();
+        authDAO = new MySQLAuthDAO();
+        gameDAO = new MySQLGameDAO();
 
+        userDAO.clear();
+        authDAO.clear();
+        gameDAO.clear();
+
+        testUser = new UserData("testUser", "password123", "testUser@email.com");
+        opponentTestUser = new UserData("opponentUser", "password456", "opponentUser@gmail.com");
         validAuthData = new AuthData("testUser", "validAuthToken");
         invalidAuthData = new AuthData("testUser", "invalidAuthToken");
 
         try {
+            userDAO.createUser(testUser);
+            userDAO.createUser(opponentTestUser);
+        } catch (DataAccessException ex) {
+            fail("Initial user creation should not fail.");
+        }
+
+        try {
             authDAO.createAuth(validAuthData);
         } catch (DataAccessException ex) {
-            fail("initial auth creation should not fail");
+            fail("Initial auth creation should not fail.");
         }
 
         try {
             gameDAO.createGame(new GameData(1, "testUser", "opponentUser", "First Game", new ChessGame()));
             gameDAO.createGame(new GameData(2, "testUser", null, "Second Game", new ChessGame()));
         } catch (DataAccessException ex) {
-            fail("initial game creation should not fail");
+            fail("Initial game creation should not fail.");
         }
 
         listGamesService = new ListGamesService(authDAO, gameDAO);
@@ -51,11 +64,11 @@ class ListGamesServiceTest {
     void listGamesSuccess() throws DataAccessException {
         List<GameData> games = listGamesService.listGames(validAuthData.authToken());
 
-        assertNotNull(games, "games list should not be null");
-        assertEquals(2, games.size(), "games list should have two games");
+        assertNotNull(games, "Games list should not be null.");
+        assertEquals(2, games.size(), "Games list should have two games.");
 
-        assertEquals("First Game", games.get(0).gameName(), "first game name should match");
-        assertEquals("Second Game", games.get(1).gameName(), "second game name should match");
+        assertEquals("First Game", games.get(0).gameName(), "first game name should match.");
+        assertEquals("Second Game", games.get(1).gameName(), "second game name should match.");
     }
 
     @Test
@@ -64,7 +77,7 @@ class ListGamesServiceTest {
             listGamesService.listGames(invalidAuthData.authToken());
         });
 
-        assertEquals("invalid auth token", ex.getMessage());
+        assertEquals("Invalid auth token.", ex.getMessage());
     }
 
     @Test
@@ -73,6 +86,6 @@ class ListGamesServiceTest {
             listGamesService.listGames(null);
         });
 
-        assertEquals("invalid auth token", ex.getMessage());
+        assertEquals("Invalid auth token.", ex.getMessage());
     }
 }

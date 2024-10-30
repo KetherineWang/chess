@@ -16,20 +16,20 @@ public class CreateGameService {
         this.gameDAO = gameDAO;
     }
 
-    public GameData createGame(String authToken, String gameName) throws DataAccessException {
+    public int createGame(String authToken, String gameName) throws DataAccessException {
         AuthData authData = authDAO.getAuth(authToken);
         if (authData == null) {
-            throw new DataAccessException("Invalid authToken");
+            throw new DataAccessException("Invalid auth token.");
         }
 
         if (gameName == null || gameName.isEmpty()) {
-            throw new DataAccessException("Invalid gameName");
+            throw new DataAccessException("Invalid game name.");
         }
 
         GameData gameData = new GameData(generateGameID(), null, null, gameName, new ChessGame());
-        gameDAO.createGame(gameData);
+        int gameID = gameDAO.createGame(gameData);
 
-        return gameData;
+        return gameID;
     }
 
     private int generateGameID() {

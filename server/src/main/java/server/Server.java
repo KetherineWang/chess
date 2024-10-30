@@ -188,16 +188,16 @@ public class Server {
                 return "{ \"message\": \"Error: bad request\" }";
             }
 
-            GameData gameData = createGameService.createGame(authToken, createGameRequest.gameName());
+            int gameID = createGameService.createGame(authToken, createGameRequest.gameName());
 
-            CreateGameResult createGameResult = new CreateGameResult(gameData.gameID());
+            CreateGameResult createGameResult = new CreateGameResult(gameID);
             res.status(200);
             return new Gson().toJson(createGameResult);
         } catch (DataAccessException ex) {
-            if (ex.getMessage().equals("Invalid gameName")) {
+            if (ex.getMessage().equals("Invalid game name.")) {
                 res.status(400);
                 return "{ \"message\": \"Error: bad request\" }";
-            } else if (ex.getMessage().equals("Invalid authToken")) {
+            } else if (ex.getMessage().equals("Invalid auth token.")) {
                 res.status(401);
                 return "{ \"message\": \"Error: unauthorized\" }";
             } else {
@@ -228,7 +228,7 @@ public class Server {
             res.status(200);
             return "{}";
         } catch (DataAccessException ex) {
-            if (ex.getMessage().equals("Invalid authToken")) {
+            if (ex.getMessage().equals("Invalid auth token.")) {
                 res.status(401);
                 return "{ \"message\": \"Error: unauthorized\" }";
             } else if (ex.getMessage().contains("already taken")) {

@@ -15,8 +15,10 @@ public class MySQLAuthDAOTest {
     public void setUp() throws DataAccessException {
         mySQLUserDAO = new MySQLUserDAO();
         mySQLAuthDAO = new MySQLAuthDAO();
+
         mySQLUserDAO.clear();
         mySQLAuthDAO.clear();
+
         UserData testUser = new UserData("testUser", "password123", "testUser@email.com");
         mySQLUserDAO.createUser(testUser);
     }

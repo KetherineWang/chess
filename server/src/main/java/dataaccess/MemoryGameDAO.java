@@ -19,7 +19,7 @@ public class MemoryGameDAO implements GameDAO {
     public List<GameData> listGames() { return new ArrayList<>(games.values()); }
 
     @Override
-    public void createGame(GameData gameData) { games.put(gameData.gameID(), gameData); }
+    public int createGame(GameData gameData) { games.put(gameData.gameID(), gameData); return gameData.gameID(); }
 
     @Override
     public GameData getGame(int gameID) {return games.get(gameID); }

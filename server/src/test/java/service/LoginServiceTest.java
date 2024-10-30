@@ -1,17 +1,10 @@
 package service;
 
-import dataaccess.UserDAO;
-import dataaccess.AuthDAO;
-import dataaccess.MemoryUserDAO;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MySQLUserDAO;
-import dataaccess.MySQLAuthDAO;
-import dataaccess.DataAccessException;
+import dataaccess.*;
 import model.UserData;
 import model.AuthData;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,6 +17,7 @@ class LoginServiceTest {
     void setUp()  throws DataAccessException{
         userDAO = new MySQLUserDAO();
         authDAO = new MySQLAuthDAO();
+
         userDAO.clear();
         authDAO.clear();
 

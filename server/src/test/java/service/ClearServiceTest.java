@@ -1,56 +1,66 @@
 package service;
 
-import dataaccess.AuthDAO;
-import dataaccess.GameDAO;
-import dataaccess.UserDAO;
-import dataaccess.MemoryUserDAO;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryGameDAO;
-import dataaccess.DataAccessException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import chess.ChessGame;
+import dataaccess.*;
 import model.UserData;
 import model.AuthData;
 import model.GameData;
 
+import org.junit.jupiter.api.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ClearServiceTest {
-
-    private ClearService clearService;
     private UserDAO userDAO;
     private AuthDAO authDAO;
     private GameDAO gameDAO;
+    private ClearService clearService;
+    private UserData testUser;
+    private AuthData validAuthData;
+    private GameData gameData;
+    private int gameID;
 
     @BeforeEach
     void setUp() throws DataAccessException {
-        // Using memory-based DAOs for testing
-        userDAO = new MemoryUserDAO();
-        authDAO = new MemoryAuthDAO();
-        gameDAO = new MemoryGameDAO();
+        userDAO = new MySQLUserDAO();
+        authDAO = new MySQLAuthDAO();
+        gameDAO = new MySQLGameDAO();
 
-        // Injecting into the ClearService
+        userDAO.clear();
+        authDAO.clear();
+        gameDAO.clear();
+
+        testUser = new UserData("testUser", "password1234", "testUser@email.com");
+        validAuthData = new AuthData("testUser", "validAuthToken");
+        gameData = new GameData(1, "testUser", null, "Test Game", new ChessGame());
+
+        try {
+            userDAO.createUser(testUser);
+        } catch (DataAccessException ex) {
+            fail("Initial user creation should not fail.");
+        }
+
+        try {
+            authDAO.createAuth(validAuthData);
+        } catch (DataAccessException ex) {
+            fail("Initial auth creation should not fail.");
+        }
+
+        try {
+            gameID = gameDAO.createGame(gameData);
+        } catch (DataAccessException ex) {
+            fail("Initial game creation should not fail.");
+        }
+
         clearService = new ClearService(userDAO, authDAO, gameDAO);
-
-        // Add some initial data for the test
-        userDAO.createUser(new UserData("user1", "password1", "user1@example.com"));
-        authDAO.createAuth(new AuthData("user1", "authToken1"));
-        gameDAO.createGame(new GameData(1, "user1", "user2", "First Game", null));
     }
 
     @Test
     void clearSuccess() throws DataAccessException{
-        // Ensure data exists before clearing
-        assertNotNull(userDAO.getUser("user1"), "User should exist before clear");
-        assertNotNull(authDAO.getAuth("authToken1"), "Auth token should exist before clear");
-        assertNotNull(gameDAO.getGame(1), "Game should exist before clear");
+        assertDoesNotThrow(() -> clearService.clear(), "Clear method should not throw an exception.");
 
-        // Call the clear() method
-        assertDoesNotThrow(() -> clearService.clear(), "clear() method threw an exception");
-
-        // Assert that data has been cleared
-        assertNull(userDAO.getUser("user1"), "User should not exist after clear");
-        assertNull(authDAO.getAuth("authToken1"), "Auth token should not exist after clear");
-        assertNull(gameDAO.getGame(1), "Game should not exist after clear");
+        assertNull(userDAO.getUser("testUser"), "User should not exist after clear");
+        assertNull(authDAO.getAuth("validAuthToken"), "Auth token should not exist after clear");
+        assertNull(gameDAO.getGame(gameID), "Game should not exist after clear");
     }
 }
