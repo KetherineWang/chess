@@ -24,9 +24,10 @@ class LoginServiceTest {
         UserData testUser = new UserData("testUser", "password123", "testUser@email.com");
 
         try {
-            userDAO.createUser(testUser);
+            RegisterService registerService = new RegisterService(userDAO, authDAO);
+            registerService.register(testUser);
         } catch (DataAccessException ex) {
-            fail("Initial user creation should not fail.");
+            fail("Initial user registration should not fail.");
         }
 
         loginService = new LoginService(userDAO, authDAO);

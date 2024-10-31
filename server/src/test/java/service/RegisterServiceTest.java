@@ -14,9 +14,13 @@ class RegisterServiceTest {
     private RegisterService registerService;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws DataAccessException {
         userDAO = new MySQLUserDAO();
         authDAO = new MySQLAuthDAO();
+
+        userDAO.clear();
+        authDAO.clear();
+
         registerService = new RegisterService(userDAO, authDAO);
     }
 
@@ -26,8 +30,12 @@ class RegisterServiceTest {
 
         AuthData authData = registerService.register(newUser);
 
-        assertEquals(newUser.username(), authData.username());
+        assertEquals(newUser.username(), authData.username(), "Username should match.");
         assertNotNull(authData.authToken(), "Auth token should not be null.");
+
+        UserData storedUser = userDAO.getUser("newUser");
+        assertNotEquals("password123", storedUser.password(), "Stored password should be hashed.");
+        assertTrue(storedUser.password().startsWith("$2a$"), "Stored password should be BCrypt hashed.");
     }
 
     @Test
