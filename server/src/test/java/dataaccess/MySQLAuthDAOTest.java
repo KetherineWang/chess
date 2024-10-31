@@ -28,6 +28,11 @@ public class MySQLAuthDAOTest {
     public void createAuthSuccess() throws DataAccessException {
         AuthData validAuthData = new AuthData("testUser", "validAuthToken");
         assertDoesNotThrow(() -> mySQLAuthDAO.createAuth(validAuthData));
+
+        AuthData retrievedAuthData = mySQLAuthDAO.getAuth("validAuthToken");
+        assertNotNull(retrievedAuthData, "Retrieved auth data should not be null.");
+        assertEquals("testUser", retrievedAuthData.username(), "Username should match.");
+        assertEquals("validAuthToken", retrievedAuthData.authToken(), "Auth token should match.");
     }
 
     @Test

@@ -66,9 +66,8 @@ class ListGamesServiceTest {
 
         assertNotNull(games, "Games list should not be null.");
         assertEquals(2, games.size(), "Games list should have two games.");
-
-        assertEquals("First Game", games.get(0).gameName(), "first game name should match.");
-        assertEquals("Second Game", games.get(1).gameName(), "second game name should match.");
+        assertEquals("First Game", games.get(0).gameName(), "First game name should match.");
+        assertEquals("Second Game", games.get(1).gameName(), "Second game name should match.");
     }
 
     @Test

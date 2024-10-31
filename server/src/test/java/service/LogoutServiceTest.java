@@ -48,7 +48,7 @@ class LogoutServiceTest {
         logoutService.logout(validAuthData.authToken());
 
         AuthData authData = authDAO.getAuth(validAuthData.authToken());
-        assertNull(authData, "Auth data should be null after successful logout.");
+        assertNull(authData, "Auth data should be null after logout.");
     }
 
     @Test

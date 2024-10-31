@@ -29,7 +29,6 @@ class RegisterServiceTest {
         UserData newUser = new UserData("newUser", "password123", "newUser@email.com");
 
         AuthData authData = registerService.register(newUser);
-
         assertEquals(newUser.username(), authData.username(), "Username should match.");
         assertNotNull(authData.authToken(), "Auth token should not be null.");
 

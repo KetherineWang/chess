@@ -49,8 +49,11 @@ class CreateGameServiceTest {
     @Test
     void createGameSuccess() throws DataAccessException {
         int gameID = createGameService.createGame(validAuthData.authToken(), "Valid Test Game");
+        assertNotNull(gameID, "Game ID should not be null.");
 
-        assertNotNull(gameID, "game id should be generated.");
+        var gameData = gameDAO.getGame(gameID);
+        assertNotNull(gameData, "Game data should not be null.");
+        assertEquals("Valid Test Game", gameData.gameName(), "Game name should match.");
     }
 
     @Test
