@@ -6,6 +6,8 @@ import dataaccess.DataAccessException;
 import model.UserData;
 import model.AuthData;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 public class RegisterService {
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
@@ -20,7 +22,10 @@ public class RegisterService {
             throw new DataAccessException("Username already exists.");
         }
 
-        userDAO.createUser(userData);
+        String hashedPassword = BCrypt.hashpw(userData.password(), BCrypt.gensalt());
+        UserData hashedUserData = new UserData(userData.username(), hashedPassword, userData.email());
+
+        userDAO.createUser(hashedUserData);
 
         AuthData authData = new AuthData(userData.username(), generateAuthToken());
         authDAO.createAuth(authData);

@@ -1,16 +1,7 @@
 package server;
 
 import service.*;
-import dataaccess.UserDAO;
-import dataaccess.AuthDAO;
-import dataaccess.GameDAO;
-import dataaccess.MemoryUserDAO;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryGameDAO;
-import dataaccess.MySQLUserDAO;
-import dataaccess.MySQLAuthDAO;
-import dataaccess.DatabaseInitializer;
-import dataaccess.DataAccessException;
+import dataaccess.*;
 import model.*;
 
 import java.util.List;
@@ -41,7 +32,7 @@ public class Server {
 
         this.userDAO = new MySQLUserDAO();
         this.authDAO = new MySQLAuthDAO();
-        this.gameDAO = new MemoryGameDAO();
+        this.gameDAO = new MySQLGameDAO();
         this.clearService = new ClearService(userDAO, authDAO, gameDAO);
         this.registerService = new RegisterService(userDAO, authDAO);
         this.loginService = new LoginService(userDAO, authDAO);
