@@ -103,7 +103,11 @@ public class MySQLGameDAO implements GameDAO {
             preparedStatement.setString(4, new Gson().toJson(gameData.chessGame()));
             preparedStatement.setInt(5, gameData.gameID());
 
-            preparedStatement.executeUpdate();
+            int affectedRows = preparedStatement.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new DataAccessException("Error updating game: Game ID not found.");
+            }
         } catch (SQLException ex) {
             throw new DataAccessException("Error updating game: " + ex.getMessage());
         }
