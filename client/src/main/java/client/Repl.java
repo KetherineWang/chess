@@ -4,4 +4,6 @@ public interface Repl {
     String help();
 
     String eval(String input);
+
+    void printPrompt();
 }

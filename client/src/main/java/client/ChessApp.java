@@ -26,12 +26,12 @@ public class ChessApp {
 
         while (true) {
             currentRepl.printPrompt();
-            var command = scanner.nextLine().trim();
+            var line = scanner.nextLine().trim();
 
-            var result = currentRepl.eval(command);
-            System.out.println(SET_TEXT_COLOR_GREEN + result);
+            var result = currentRepl.eval(line);
+            System.out.println(SET_TEXT_COLOR_BLUE + result);
 
-            if (command.equalsIgnoreCase("quit")) {
+            if (line.startsWith("quit")) {
                 System.out.println("Exiting Chess 240. Goodbye!");
                 break;
             }
