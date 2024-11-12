@@ -1,11 +1,15 @@
 package client;
 
+import model.GameData;
+
 import java.util.Arrays;
+import java.util.List;
 
 import static ui.EscapeSequences.*;
 
 public class PostLoginRepl implements Repl {
     private final ChessClient chessClient;
+    private List<GameData> gameList;
     private final String authToken;
 
     public PostLoginRepl(ChessClient chessClient, String authToken) {
@@ -54,7 +58,9 @@ public class PostLoginRepl implements Repl {
 
     private String handleListGames() {
         try {
-            return chessClient.listGames();
+            var response = chessClient.listGames();
+            this.gameList = chessClient.getCurrentGameList();
+            return response;
         } catch (Exception ex) {
             return "Error: Unable to list games. " + ex.getMessage();
         }
@@ -68,7 +74,13 @@ public class PostLoginRepl implements Repl {
         try {
             int gameID = Integer.parseInt(args[0]);
             String playerColor = args[1].toUpperCase();
-            return chessClient.joinGame(gameID, playerColor);
+
+            if (gameID < 1 || gameID > gameList.size()) {
+                return "Error: Invalid game ID.";
+            }
+
+            GameData selectedGame = gameList.get(gameID - 1);
+            return chessClient.joinGame(selectedGame.gameID(), playerColor);
         } catch (NumberFormatException ex) {
             return "Error: Game ID must be an integer.";
         } catch (Exception e) {
@@ -83,7 +95,13 @@ public class PostLoginRepl implements Repl {
 
         try {
             int gameID = Integer.parseInt(args[0]);
-            return chessClient.observeGame(gameID);
+
+            if (gameID < 1 || gameID > gameList.size()) {
+                return "Error: Invalid game ID.";
+            }
+
+            GameData selectedGame = gameList.get(gameID - 1);
+            return chessClient.observeGame(selectedGame.gameID());
         } catch (NumberFormatException ex) {
             return "Error: Game ID must be an integer.";
         } catch (Exception e) {
