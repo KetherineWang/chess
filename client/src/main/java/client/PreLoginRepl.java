@@ -6,11 +6,9 @@ import static ui.EscapeSequences.*;
 
 public class PreLoginRepl implements Repl {
     private final ChessClient chessClient;
-    private final ChessApp chessApp;
 
-    public PreLoginRepl(ChessClient chessClient, ChessApp chessApp) {
+    public PreLoginRepl(ChessClient chessClient) {
         this.chessClient = chessClient;
-        this.chessApp = chessApp;
     }
 
     @Override
@@ -23,24 +21,29 @@ public class PreLoginRepl implements Repl {
         var command = tokens[0].toLowerCase();
         var args = Arrays.copyOfRange(tokens, 1, tokens.length);
 
-        return switch (command) {
-            case "help" -> help();
-            case "register" -> handleRegister(args);
-            case "login" -> handleLogin(args);
-            case "quit" -> "quit";
-            default -> "Error: Unrecognized command. Type 'help' for a list of commands.";
-        };
+        try {
+            return switch (command) {
+                case "register" -> handleRegister(args);
+                case "login" -> handleLogin(args);
+                case "quit" -> "quit";
+                case "help" -> help();
+                default -> "Error: Unrecognized command. Type 'help' for a list of commands.";
+            };
+        } catch (Exception ex) {
+            return SET_TEXT_COLOR_RED + "An error occurred while processing the command." + RESET_TEXT_COLOR;
+        }
     }
 
     private String handleRegister(String[] args) {
         if (args.length != 3) {
-            return "Error: Register requires 'register <username> <password> <email>'.";
+            return "Error: Register requires 3 arguments: 'register <username> <password> <email>'.";
         }
+        var username = args[0];
+        var password = args[1];
+        var email = args[2];
 
         try {
-            var response = chessClient.register(args[0], args[1], args[2]);
-            chessApp.switchToPostLogin();
-            return response;
+            return chessClient.register(username, password, email);
         } catch (Exception ex) {
             return "Error: Unable to register. " + ex.getMessage();
         }
@@ -48,13 +51,13 @@ public class PreLoginRepl implements Repl {
 
     private String handleLogin(String[] args) {
         if (args.length != 2) {
-            return "Error: Login requires <username> <password>";
+            return "Error: Login requires 2 arguments: 'login <username> <password>'.";
         }
+        var username = args[0];
+        var password = args[1];
 
         try {
-            var response = chessClient.login(args[0], args[1]);
-            chessApp.switchToPreLogin();
-            return response;
+            return chessClient.login(username, password);
         } catch (Exception ex) {
             return "Error: Unable to login. " + ex.getMessage();
         }
@@ -64,10 +67,10 @@ public class PreLoginRepl implements Repl {
     public String help() {
         return """
                 Available commands:
-                register <USERNAME> <PASSWORD> <EMAIL> - to create an account
-                login <USERNAME> <PASSWORD> - to log in
-                quit - to exit the application
-                help - to display available commands (this message)
+                register <USERNAME> <PASSWORD> <EMAIL>     - to create an account
+                login <USERNAME> <PASSWORD>                - to log in
+                quit                                       - to exit the application
+                help                                       - to display available commands (this message)
                 """;
     }
 
