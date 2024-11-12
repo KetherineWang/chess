@@ -6,7 +6,7 @@
 //        System.out.println("♕ 240 Chess Client: " + piece);
 //    }
 //}
-import ui.Repl;
+import client.ChessApp;
 
 public class Main {
     public static void main(String[] args) {
@@ -16,6 +16,6 @@ public class Main {
             serverURL = args[0];
         }
 
-        new Repl(serverURL).run();
+        new ChessApp(serverURL).run();
     }
 }
