@@ -63,7 +63,7 @@ public class PostLoginRepl implements Repl {
 
     private String handleJoinGame(String[] args) {
         if (args.length != 2) {
-            return "Error: Join game requires 2 arguments: 'join <GAME ID> <PLAYER COLOR: WHITE|BLACK>'.";
+            return "Error: Join game requires 2 arguments: 'join <GAME NUMBER> <PLAYER COLOR: WHITE|BLACK>'.";
         }
 
         try {
@@ -76,13 +76,13 @@ public class PostLoginRepl implements Repl {
             List<GameData> gameList = chessClient.getCurrentGameList();
 
             if (gameNumber < 1 || gameNumber > gameList.size()) {
-                return "Error: Invalid game ID.";
+                return "Error: Invalid game number.";
             }
 
             GameData selectedGame = gameList.get(gameNumber - 1);
             return chessClient.joinGame(gameNumber, selectedGame.gameID(), playerColor);
         } catch (NumberFormatException ex) {
-            return "Error: Game ID must be an integer.";
+            return "Error: Game number must be an integer.";
         } catch (Exception e) {
             return "Error: Unable to join game. " + e.getMessage();
         }
@@ -90,25 +90,25 @@ public class PostLoginRepl implements Repl {
 
     private String handleObserveGame(String[] args) {
         if (args.length != 1) {
-            return "Error: Observe game requires 1 argument: 'observe <GAME ID>'.";
+            return "Error: Observe game requires 1 argument: 'observe <GAME NUMBER>'.";
         }
 
         try {
-            int gameID = Integer.parseInt(args[0]);
+            int gameNumber = Integer.parseInt(args[0]);
 
             if (chessClient.getCurrentGameList() == null) {
                 chessClient.listGames();
             }
             List<GameData> gameList = chessClient.getCurrentGameList();
 
-            if (gameID < 1 || gameID > gameList.size()) {
-                return "Error: Invalid game ID.";
+            if (gameNumber < 1 || gameNumber > gameList.size()) {
+                return "Error: Invalid game number.";
             }
 
-            GameData selectedGame = gameList.get(gameID - 1);
-            return chessClient.observeGame(selectedGame.gameID());
+            GameData selectedGame = gameList.get(gameNumber - 1);
+            return chessClient.observeGame(gameNumber, selectedGame.gameID());
         } catch (NumberFormatException ex) {
-            return "Error: Game ID must be an integer.";
+            return "Error: Game number must be an integer.";
         } catch (Exception e) {
             return "Error: Unable to observe game. " + e.getMessage();
         }
@@ -138,6 +138,6 @@ public class PostLoginRepl implements Repl {
 
     @Override
     public void printPrompt() {
-        System.out.print("\n" + RESET_TEXT_COLOR + "[LOGGED_IN] >>> " + SET_TEXT_COLOR_GREEN);
+        System.out.print("\n" + RESET_TEXT_COLOR + "[LOGGED_IN] >>> " + SET_TEXT_COLOR_GREEN + RESET_TEXT_COLOR);
     }
 }

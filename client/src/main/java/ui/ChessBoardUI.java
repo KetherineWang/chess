@@ -28,7 +28,7 @@ public class ChessBoardUI {
             {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK}
     };
 
-    public static void main(String[] args) {
+    public static void drawInitialBoard() {
         PrintStream out = System.out;
         out.print(ERASE_SCREEN);
 

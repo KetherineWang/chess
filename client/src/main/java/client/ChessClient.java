@@ -1,19 +1,22 @@
 package client;
 
 import model.*;
-import java.util.List;
-
+import ui.ChessBoardUI;
 import exception.ResponseException;
+
+import java.util.List;
 
 public class ChessClient {
     private final ServerFacade serverFacade;
     private final ChessApp chessApp;
     private String authToken;
     private List<GameData> currentGameList;
+    private final ChessBoardUI chessBoardUI;
 
     public ChessClient(String serverURL, ChessApp chessApp) {
         this.serverFacade = new ServerFacade(serverURL);
         this.chessApp = chessApp;
+        this.chessBoardUI = new ChessBoardUI();
     }
 
     public String register(String username, String password, String email) {
@@ -68,7 +71,7 @@ public class ChessClient {
         try {
             CreateGameRequest createGameRequest = new CreateGameRequest(gameName);
             serverFacade.createGame(authToken, createGameRequest);
-            return "Game created successfully.";
+            return String.format("Game %s created successfully.", gameName);
         } catch (ResponseException ex) {
             return handleError(ex, "createGame");
         } catch (Exception ex) {
@@ -101,6 +104,7 @@ public class ChessClient {
         try {
             JoinGameRequest joinGameRequest = new JoinGameRequest(gameID, playerColor);
             serverFacade.joinGame(authToken, joinGameRequest);
+            ChessBoardUI.drawInitialBoard();
             return String.format("Successfully join game %d as %s player.", gameNumber, playerColor);
         } catch (ResponseException ex) {
             return handleError(ex, "joinGame");
@@ -109,8 +113,9 @@ public class ChessClient {
         }
     }
 
-    public String observeGame(int gameID) {
-        return String.format("Observing game %d.", gameID);
+    public String observeGame(int gameNumber, int gameID) {
+        ChessBoardUI.drawInitialBoard();
+        return String.format("Observing game %d.", gameNumber);
     }
 
     private String handleError(ResponseException ex, String action) {
