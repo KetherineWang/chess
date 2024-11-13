@@ -28,7 +28,7 @@ public class ChessBoardUI {
             {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK}
     };
 
-    public static void drawInitialBoard() {
+    public static void drawInitialBoards() {
         PrintStream out = System.out;
         out.print(ERASE_SCREEN);
 
@@ -41,7 +41,8 @@ public class ChessBoardUI {
     }
 
     private static void drawChessBoard(PrintStream out, boolean whiteBottom) {
-        String[] columns = whiteBottom ? new String[] {"a", "b", "c", "d", "e", "f", "g", "h"} : new String[] {"h", "g", "f", "e", "d", "c", "b", "a"};
+        String[] columns = whiteBottom ? new String[] {"a", "b", "c", "d", "e", "f", "g", "h"} :
+                                         new String[] {"h", "g", "f", "e", "d", "c", "b", "a"};
         String[] rows = whiteBottom ? new String[] {"8", "7", "6", "5", "4", "3", "2", "1"} : new String[] {"1", "2", "3", "4", "5", "6", "7", "8"};
         String[][] board = whiteBottom ? INITIAL_BOARD_WHITE_BOTTOM : INITIAL_BOARD_BLACK_BOTTOM;
 

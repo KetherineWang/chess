@@ -126,13 +126,13 @@ public class PostLoginRepl implements Repl {
     public String help() {
         return """
                 Available commands:
-                logout                                         - to log out
-                create <GAME NAME>                             - to create a game
-                list                                           - to list games
-                join <GAME ID> <PLAYER COLOR: WHITE|BLACK>     - to join a game
-                observe <GAME ID>                              - to observe a game
-                quit                                           - to exit the application
-                help                                           - to display available commands (this message)
+                logout                                             - to log out
+                create <GAME NAME>                                 - to create a game
+                list                                               - to list games
+                join <GAME NUMBER> <PLAYER COLOR: WHITE|BLACK>     - to join a game
+                observe <GAME NUMBER>                              - to observe a game
+                quit                                               - to exit the application
+                help                                               - to display available commands (this message)
                 """;
     }
 

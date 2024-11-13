@@ -11,21 +11,21 @@ public class ChessClient {
     private final ChessApp chessApp;
     private String authToken;
     private List<GameData> currentGameList;
-    private final ChessBoardUI chessBoardUI;
 
     public ChessClient(String serverURL, ChessApp chessApp) {
         this.serverFacade = new ServerFacade(serverURL);
         this.chessApp = chessApp;
-        this.chessBoardUI = new ChessBoardUI();
     }
 
     public String register(String username, String password, String email) {
         try {
             RegisterRequest registerRequest = new RegisterRequest(username, password, email);
             RegisterResult registerResult = serverFacade.register(registerRequest);
+
             this.authToken = registerResult.authToken();
 
             chessApp.switchToPostLogin();
+
             return String.format("Registration successful. You are now logged in as %s.", username);
         } catch (ResponseException ex) {
             return handleError(ex, "register");
@@ -38,9 +38,11 @@ public class ChessClient {
         try {
             LoginRequest loginRequest = new LoginRequest(username, password);
             LoginResult loginResult = serverFacade.login(loginRequest);
+
             this.authToken = loginResult.authToken();
 
             chessApp.switchToPostLogin();
+
             return String.format("Login successful. You are now logged in as %s.", username);
         } catch (ResponseException ex) {
             return handleError(ex, "login");
@@ -54,9 +56,11 @@ public class ChessClient {
 
         try {
             serverFacade.logout(authToken);
+
             authToken = null;
 
             chessApp.switchToPreLogin();
+
             return "Logged out successfully.";
         } catch (ResponseException ex) {
             return handleError(ex, "logout");
@@ -71,6 +75,7 @@ public class ChessClient {
         try {
             CreateGameRequest createGameRequest = new CreateGameRequest(gameName);
             serverFacade.createGame(authToken, createGameRequest);
+
             return String.format("Game %s created successfully.", gameName);
         } catch (ResponseException ex) {
             return handleError(ex, "createGame");
@@ -84,12 +89,15 @@ public class ChessClient {
 
         try {
             currentGameList = serverFacade.listGames(authToken);
+
             StringBuilder listGamesResponse = new StringBuilder("Available games:\n");
+
             for (int i = 0; i < currentGameList.size(); i++) {
                 GameData game = currentGameList.get(i);
-                listGamesResponse.append(String.format("%d: %s (White: %s, Black: %s)\n",
+                listGamesResponse.append(String.format("%d. %s (WHITE: %s, BLACK: %s)\n",
                         i + 1, game.gameName(), game.whiteUsername(), game.blackUsername()));
             }
+
             return listGamesResponse.toString();
         } catch (ResponseException ex) {
             return handleError(ex, "listGames");
@@ -104,8 +112,10 @@ public class ChessClient {
         try {
             JoinGameRequest joinGameRequest = new JoinGameRequest(gameID, playerColor);
             serverFacade.joinGame(authToken, joinGameRequest);
-            ChessBoardUI.drawInitialBoard();
-            return String.format("Successfully join game %d as %s player.", gameNumber, playerColor);
+
+            ChessBoardUI.drawInitialBoards();
+
+            return String.format("Successfully joined game %d as %s player.", gameNumber, playerColor);
         } catch (ResponseException ex) {
             return handleError(ex, "joinGame");
         } catch (Exception e) {
@@ -114,7 +124,8 @@ public class ChessClient {
     }
 
     public String observeGame(int gameNumber, int gameID) {
-        ChessBoardUI.drawInitialBoard();
+        ChessBoardUI.drawInitialBoards();
+
         return String.format("Observing game %d.", gameNumber);
     }
 
@@ -150,6 +161,8 @@ public class ChessClient {
                     return "Error: You must be logged in to join a game.";
                 } else if (ex.getMessage().contains("already taken")) {
                     return "Error: The chosen player color has already been taken in the selected game.";
+                } else if (ex.getMessage().contains("bad request")) {
+                    return "Error: Invalid player color.";
                 }
                 break;
             default:

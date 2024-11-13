@@ -46,35 +46,23 @@ public class ServerFacade {
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
-        try {
-            URL url = (new URI(serverURL + path)).toURL();
-            HttpURLConnection http = (HttpURLConnection) url.openConnection();
-            http.setRequestMethod(method);
-            http.setDoOutput(true);
-
-            if (request != null) {
-                http.addRequestProperty("Content-Type", "application/json");
-                String requestData = new Gson().toJson(request);
-                try (OutputStream requestBody = http.getOutputStream()) {
-                    requestBody.write(requestData.getBytes());
-                }
-            }
-
-            return handleResponse(http, responseClass);
-        } catch (IOException ex) {
-            throw new ResponseException(500, "Server connection error: " + ex.getMessage());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        return makeRequestWithAuth(method, path, request, null, responseClass);
     }
 
     private <T> T makeAuthRequest(String method, String path, Object request, String authToken, Class<T> responseClass) throws ResponseException {
+        return makeRequestWithAuth(method, path, request, authToken, responseClass);
+    }
+
+    private <T> T makeRequestWithAuth(String method, String path, Object request, String authToken, Class<T> responseClass) throws ResponseException {
         try {
             URL url = (new URI(serverURL + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
-            http.setRequestProperty("Authorization", authToken);
+
+            if (authToken != null) {
+                http.setRequestProperty("Authorization", authToken);
+            }
 
             if (request != null) {
                 http.addRequestProperty("Content-Type", "application/json");
@@ -95,6 +83,7 @@ public class ServerFacade {
     private <T> T handleResponse(HttpURLConnection http, Class<T> responseClass) throws ResponseException {
         try {
             int statusCode = http.getResponseCode();
+
             if (statusCode >= 200 && statusCode < 300) {
                 if (responseClass == Void.class) {
                     return null;
