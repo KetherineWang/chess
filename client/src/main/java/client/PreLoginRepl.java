@@ -76,6 +76,6 @@ public class PreLoginRepl implements Repl {
 
     @Override
     public void printPrompt() {
-        System.out.println("\n" + RESET_TEXT_COLOR + "[LOGGED_OUT] >>> " + SET_TEXT_COLOR_GREEN);
+        System.out.print("\n" + RESET_TEXT_COLOR + "[LOGGED_OUT] >>> " + SET_TEXT_COLOR_GREEN);
     }
 }

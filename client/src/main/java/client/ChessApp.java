@@ -2,8 +2,6 @@ package client;
 
 import java.util.Scanner;
 
-import ui.EscapeSequences.*;
-
 import static ui.EscapeSequences.*;
 
 public class ChessApp {
@@ -11,7 +9,6 @@ public class ChessApp {
     private final ChessClient chessClient;
     private final PreLoginRepl preLoginRepl;
     private PostLoginRepl postLoginRepl;
-    private String authToken;
 
     public ChessApp(String serverURL) {
         this.chessClient = new ChessClient(serverURL, this);
@@ -37,14 +34,12 @@ public class ChessApp {
         }
     }
 
-    public void switchToPostLogin(String authToken) {
-        this.authToken = authToken;
-        this.postLoginRepl = new PostLoginRepl(chessClient, authToken);
+    public void switchToPostLogin() {
+        this.postLoginRepl = new PostLoginRepl(chessClient);
         this.currentRepl = postLoginRepl;
     }
 
     public void switchToPreLogin() {
-        this.authToken = null;
         this.currentRepl = preLoginRepl;
     }
 }

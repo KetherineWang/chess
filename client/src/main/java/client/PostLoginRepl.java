@@ -9,12 +9,9 @@ import static ui.EscapeSequences.*;
 
 public class PostLoginRepl implements Repl {
     private final ChessClient chessClient;
-    private List<GameData> gameList;
-    private final String authToken;
 
-    public PostLoginRepl(ChessClient chessClient, String authToken) {
+    public PostLoginRepl(ChessClient chessClient) {
         this.chessClient = chessClient;
-        this.authToken = authToken;
     }
 
     @Override
@@ -58,9 +55,7 @@ public class PostLoginRepl implements Repl {
 
     private String handleListGames() {
         try {
-            var response = chessClient.listGames();
-            this.gameList = chessClient.getCurrentGameList();
-            return response;
+            return chessClient.listGames();
         } catch (Exception ex) {
             return "Error: Unable to list games. " + ex.getMessage();
         }
@@ -72,15 +67,20 @@ public class PostLoginRepl implements Repl {
         }
 
         try {
-            int gameID = Integer.parseInt(args[0]);
+            int gameNumber = Integer.parseInt(args[0]);
             String playerColor = args[1].toUpperCase();
 
-            if (gameID < 1 || gameID > gameList.size()) {
+            if (chessClient.getCurrentGameList() == null) {
+                chessClient.listGames();
+            }
+            List<GameData> gameList = chessClient.getCurrentGameList();
+
+            if (gameNumber < 1 || gameNumber > gameList.size()) {
                 return "Error: Invalid game ID.";
             }
 
-            GameData selectedGame = gameList.get(gameID - 1);
-            return chessClient.joinGame(selectedGame.gameID(), playerColor);
+            GameData selectedGame = gameList.get(gameNumber - 1);
+            return chessClient.joinGame(gameNumber, selectedGame.gameID(), playerColor);
         } catch (NumberFormatException ex) {
             return "Error: Game ID must be an integer.";
         } catch (Exception e) {
@@ -95,6 +95,11 @@ public class PostLoginRepl implements Repl {
 
         try {
             int gameID = Integer.parseInt(args[0]);
+
+            if (chessClient.getCurrentGameList() == null) {
+                chessClient.listGames();
+            }
+            List<GameData> gameList = chessClient.getCurrentGameList();
 
             if (gameID < 1 || gameID > gameList.size()) {
                 return "Error: Invalid game ID.";
@@ -133,6 +138,6 @@ public class PostLoginRepl implements Repl {
 
     @Override
     public void printPrompt() {
-        System.out.println("\n" + RESET_TEXT_COLOR + "[LOGGED_IN] >>> " + SET_TEXT_COLOR_GREEN);
+        System.out.print("\n" + RESET_TEXT_COLOR + "[LOGGED_IN] >>> " + SET_TEXT_COLOR_GREEN);
     }
 }

@@ -22,7 +22,7 @@ public class ChessClient {
             RegisterResult registerResult = serverFacade.register(registerRequest);
             this.authToken = registerResult.authToken();
 
-            chessApp.switchToPostLogin(authToken);
+            chessApp.switchToPostLogin();
             return String.format("Registration successful. You are now logged in as %s.", username);
         } catch (ResponseException ex) {
             return handleError(ex, "register");
@@ -37,7 +37,7 @@ public class ChessClient {
             LoginResult loginResult = serverFacade.login(loginRequest);
             this.authToken = loginResult.authToken();
 
-            chessApp.switchToPostLogin(authToken);
+            chessApp.switchToPostLogin();
             return String.format("Login successful. You are now logged in as %s.", username);
         } catch (ResponseException ex) {
             return handleError(ex, "login");
@@ -67,8 +67,8 @@ public class ChessClient {
 
         try {
             CreateGameRequest createGameRequest = new CreateGameRequest(gameName);
-            CreateGameResult createGameResult = serverFacade.createGame(authToken, createGameRequest);
-            return String.format("Game created successfully. Game ID: %d", createGameResult.gameID());
+            serverFacade.createGame(authToken, createGameRequest);
+            return "Game created successfully.";
         } catch (ResponseException ex) {
             return handleError(ex, "createGame");
         } catch (Exception ex) {
@@ -95,13 +95,13 @@ public class ChessClient {
         }
     }
 
-    public String joinGame(int gameID, String playerColor) throws ResponseException {
+    public String joinGame(int gameNumber, int gameID, String playerColor) throws ResponseException {
         assertLoggedIn();
 
         try {
             JoinGameRequest joinGameRequest = new JoinGameRequest(gameID, playerColor);
             serverFacade.joinGame(authToken, joinGameRequest);
-            return String.format("Successfully join game %d as %s player.", gameID, playerColor);
+            return String.format("Successfully join game %d as %s player.", gameNumber, playerColor);
         } catch (ResponseException ex) {
             return handleError(ex, "joinGame");
         } catch (Exception e) {
@@ -110,7 +110,7 @@ public class ChessClient {
     }
 
     public String observeGame(int gameID) {
-        return String.format("Observing game %d,", gameID);
+        return String.format("Observing game %d.", gameID);
     }
 
     private String handleError(ResponseException ex, String action) {

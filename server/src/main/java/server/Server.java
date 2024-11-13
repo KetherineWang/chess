@@ -52,8 +52,8 @@ public class Server {
         Spark.post("/user", this::registerUser);
         Spark.post("/session", this::loginUser);
         Spark.delete("/session", this::logoutUser);
-        Spark.get("/game", this::listGames);
         Spark.post("/game", this::createGame);
+        Spark.get("/game", this::listGames);
         Spark.put("/game", this::joinGame);
 
         Spark.exception(ResponseException.class, this::exceptionHandler);
@@ -127,7 +127,7 @@ public class Server {
 
     private Object logoutUser(Request req, Response res) throws ResponseException {
         try {
-            String authToken = req.headers("authorization");
+            String authToken = req.headers("Authorization");
             if (authToken == null || authToken.isEmpty()) {
                 res.status(401);
                 return "{ \"message\": \"Error: unauthorized\" }";
@@ -145,29 +145,9 @@ public class Server {
         }
     }
 
-    private Object listGames(Request req, Response res) throws ResponseException {
-        try {
-            String authToken = req.headers("authorization");
-            if (authToken == null || authToken.isEmpty()) {
-                res.status(401);
-                return "{ \"message\": \"Error: unauthorized\" }";
-            }
-
-            List<GameData> games = listGamesService.listGames(authToken);
-            res.status(200);
-            return new Gson().toJson(Map.of("games", games));
-        } catch (DataAccessException ex) {
-            res.status(401);
-            return "{ \"message\": \"Error: unauthorized\" }";
-        } catch (Exception e) {
-            res.status(500);
-            throw new ResponseException(500, e.getMessage());
-        }
-    }
-
     private Object createGame(Request req, Response res) throws ResponseException {
         try {
-            String authToken = req.headers("authorization");
+            String authToken = req.headers("Authorization");
             if (authToken == null || authToken.isEmpty()) {
                 res.status(401);
                 return "{ \"message\": \"Error: unauthorized\" }";
@@ -201,9 +181,31 @@ public class Server {
         }
     }
 
+    private Object listGames(Request req, Response res) throws ResponseException {
+        try {
+            String authToken = req.headers("Authorization");
+            if (authToken == null || authToken.isEmpty()) {
+                res.status(401);
+                return "{ \"message\": \"Error: unauthorized\" }";
+            }
+
+            List<GameData> games = listGamesService.listGames(authToken);
+
+            ListGameResult listGameResult = new ListGameResult(games);
+            res.status(200);
+            return new Gson().toJson(listGameResult);
+        } catch (DataAccessException ex) {
+            res.status(401);
+            return "{ \"message\": \"Error: unauthorized\" }";
+        } catch (Exception e) {
+            res.status(500);
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
+
     private Object joinGame(Request req, Response res) throws ResponseException {
         try {
-            String authToken = req.headers("authorization");
+            String authToken = req.headers("Authorization");
             if (authToken == null || authToken.isEmpty()) {
                 res.status(401);
                 return "{ \"message\": \"Error: unauthorized\" }";
