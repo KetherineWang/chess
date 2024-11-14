@@ -176,4 +176,36 @@ public class ServerFacadeTests {
             fail("Unexpected exception during game listing failure test: " + ex.getMessage());
         }
     }
+
+    @Test
+    void joinGameSuccess() {
+        try {
+            RegisterRequest registerRequest = new RegisterRequest("testUser", "password123", "testUser@email.com");
+            RegisterResult registerResult = facade.register(registerRequest);
+
+            CreateGameResult createGameResult = facade.createGame(registerResult.authToken(), new CreateGameRequest("Game 3"));
+
+            JoinGameRequest joinGameRequest = new JoinGameRequest(createGameResult.gameID(), "WHITE");
+            assertDoesNotThrow(() -> facade.joinGame(registerResult.authToken(), joinGameRequest));
+        } catch (ResponseException ex) {
+            fail("Expected successful game join, but got exception: " + ex.getMessage());
+        }
+    }
+
+    @Test
+    void joinGameFailurePlayerColorAlreadyTaken() {
+        try {
+            RegisterRequest registerRequest = new RegisterRequest("testUser", "password123", "testUser@email.com");
+            RegisterResult registerResult = facade.register(registerRequest);
+
+            CreateGameResult createGameResult = facade.createGame(registerResult.authToken(), new CreateGameRequest("Game 3"));
+
+            JoinGameRequest joinGameRequest = new JoinGameRequest(createGameResult.gameID(), "WHITE");
+            facade.joinGame(registerResult.authToken(), joinGameRequest);
+
+            assertThrows(ResponseException.class, () -> facade.joinGame(registerResult.authToken(), joinGameRequest), "Expected player color already taken exception.");
+        } catch (ResponseException ex) {
+            fail("Unexpected exception during game join failure test: " + ex.getMessage());
+        }
+    }
 }
