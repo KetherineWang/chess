@@ -61,4 +61,34 @@ public class ServerFacadeTests {
             fail("Unexpected exception during registration failure test: " + ex.getMessage());
         }
     }
+
+    @Test
+    void loginSuccess() {
+        try {
+            RegisterRequest registerRequest = new RegisterRequest("loginUser", "password789", "loginUser@email.com");
+            facade.register(registerRequest);
+
+            LoginRequest loginRequest = new LoginRequest("loginUser", "password789");
+            LoginResult loginResult = facade.login(loginRequest);
+
+            assertNotNull(loginResult);
+            assertNotNull(loginResult.authToken());
+            assertTrue(loginResult.authToken().length() > 10);
+        } catch (ResponseException ex) {
+            fail("Expected successful login, but got exception: " + ex.getMessage());
+        }
+    }
+
+    @Test
+    void loginFailureInvalidCredentials() {
+        try {
+            RegisterRequest registerRequest = new RegisterRequest("loginUser", "password789", "loginUser@email.com");
+            facade.register(registerRequest);
+
+            LoginRequest loginRequest = new LoginRequest("invalidUsername", "invalidPassword");
+            assertThrows(ResponseException.class, () -> facade.login(loginRequest), "Expected invalid username or password exception.");
+        } catch (ResponseException ex) {
+            fail("Unexpected exception during login failure test: " + ex.getMessage());
+        }
+    }
 }
