@@ -45,7 +45,7 @@ public class ServerFacade {
         makeAuthRequest("PUT", path, joinGameRequest, authToken, Void.class);
     }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
+    public <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
         return makeRequestWithAuth(method, path, request, null, responseClass);
     }
 
