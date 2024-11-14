@@ -144,4 +144,36 @@ public class ServerFacadeTests {
             fail("Unexpected exception during game creation failure test: " + ex.getMessage());
         }
     }
+
+    @Test
+    void listGamesSuccess() {
+        try {
+            RegisterRequest registerRequest = new RegisterRequest("testUser", "password123", "testUser@email.com");
+            RegisterResult registerResult = facade.register(registerRequest);
+
+            facade.createGame(registerResult.authToken(), new CreateGameRequest("Game 1"));
+            facade.createGame(registerResult.authToken(), new CreateGameRequest("Game 2"));
+
+            List<GameData> games = facade.listGames(registerResult.authToken());
+            assertNotNull(games);
+            assertTrue(games.size() >= 2);
+        } catch (ResponseException ex) {
+            fail("Expected successful game listing, but got exception: " + ex.getMessage());
+        }
+    }
+
+    @Test
+    void listGamesFailureInvalidAuthToken() {
+        try {
+            RegisterRequest registerRequest = new RegisterRequest("testUser", "password123", "testUser@email.com");
+            RegisterResult registerResult = facade.register(registerRequest);
+
+            facade.createGame(registerResult.authToken(), new CreateGameRequest("Game 1"));
+            facade.createGame(registerResult.authToken(), new CreateGameRequest("Game 2"));
+
+            assertThrows(ResponseException.class, () -> facade.listGames("invalidAuthToken"), "Expected invalid auth token exception.");
+        } catch (ResponseException ex) {
+            fail("Unexpected exception during game listing failure test: " + ex.getMessage());
+        }
+    }
 }
