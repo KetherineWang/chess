@@ -91,4 +91,28 @@ public class ServerFacadeTests {
             fail("Unexpected exception during login failure test: " + ex.getMessage());
         }
     }
+
+    @Test
+    void logoutSuccess() {
+        try {
+            RegisterRequest registerRequest = new RegisterRequest("testUser", "password123", "testUser@email.com");
+            RegisterResult registerResult = facade.register(registerRequest);
+
+            assertDoesNotThrow(() -> facade.logout(registerResult.authToken()));
+        } catch (ResponseException ex) {
+            fail("Expected successful logout, but got exception: " + ex.getMessage());
+        }
+    }
+
+    @Test
+    void logoutFailureInvalidAuthToken() {
+        try {
+            RegisterRequest registerRequest = new RegisterRequest("testUser", "password123", "testUser@email.com");
+            facade.register(registerRequest);
+
+            assertThrows(ResponseException.class, () -> facade.logout("invalidAuthToken"), "Expected invalid auth token exception.");
+        } catch (ResponseException ex) {
+            fail("Unexpected exception during logout failure test: " + ex.getMessage());
+        }
+    }
 }
