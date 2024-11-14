@@ -139,7 +139,9 @@ public class ServerFacadeTests {
             facade.register(registerRequest);
 
             CreateGameRequest createGameRequest = new CreateGameRequest("Test Game");
-            assertThrows(ResponseException.class, () -> facade.createGame("invalidAuthToken", createGameRequest), "Expected invalid auth token exception.");
+            assertThrows(ResponseException.class, () ->
+                    facade.createGame("invalidAuthToken", createGameRequest), "Expected invalid auth token exception."
+            );
         } catch (ResponseException ex) {
             fail("Unexpected exception during game creation failure test: " + ex.getMessage());
         }
@@ -203,7 +205,9 @@ public class ServerFacadeTests {
             JoinGameRequest joinGameRequest = new JoinGameRequest(createGameResult.gameID(), "WHITE");
             facade.joinGame(registerResult.authToken(), joinGameRequest);
 
-            assertThrows(ResponseException.class, () -> facade.joinGame(registerResult.authToken(), joinGameRequest), "Expected player color already taken exception.");
+            assertThrows(ResponseException.class, () ->
+                    facade.joinGame(registerResult.authToken(), joinGameRequest), "Expected player color already taken exception."
+            );
         } catch (ResponseException ex) {
             fail("Unexpected exception during game join failure test: " + ex.getMessage());
         }
