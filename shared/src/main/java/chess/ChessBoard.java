@@ -18,7 +18,7 @@ public class ChessBoard {
     }
 
     /**
-     * Adds a chess piece to the chessboard
+     * Adds a chess piece to the chessboardobserve
      *
      * @param position where to add the piece to
      * @param piece    the piece to add
