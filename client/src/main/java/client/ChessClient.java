@@ -217,7 +217,7 @@ public class ChessClient implements ServerMessageObserver {
 
             return "Connected to game!";
         } catch (Exception ex) {
-            return "Error connection to game: " + ex.getMessage();
+            return "Error connecting to game: " + ex.getMessage();
         }
     }
 

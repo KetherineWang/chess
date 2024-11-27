@@ -43,7 +43,7 @@ public class Server {
         this.createGameService = new CreateGameService(authDAO, gameDAO);
         this.joinGameService = new JoinGameService(authDAO, gameDAO);
 
-        webSocketHandler = new WebSocketHandler(gameDAO);
+        webSocketHandler = new WebSocketHandler(authDAO, gameDAO);
     }
 
     public int run(int desiredPort) {

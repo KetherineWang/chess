@@ -3,7 +3,9 @@ package server.websocket;
 import org.eclipse.jetty.websocket.api.*;
 import org.eclipse.jetty.websocket.api.annotations.*;
 
+import model.AuthData;
 import model.GameData;
+import dataaccess.AuthDAO;
 import dataaccess.GameDAO;
 import dataaccess.DataAccessException;
 import websocket.commands.UserGameCommand;
@@ -16,10 +18,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
 public class WebSocketHandler {
+    private final AuthDAO authDAO;
     private final GameDAO gameDAO;
     private final Map<Session, String> connectedClients = new ConcurrentHashMap<>();
 
-    public WebSocketHandler(GameDAO gameDAO) {
+    public WebSocketHandler(AuthDAO authDAO, GameDAO gameDAO) {
+        this.authDAO = authDAO;
         this.gameDAO = gameDAO;
     }
 
@@ -51,8 +55,9 @@ public class WebSocketHandler {
 
     private void handleConnectCommand(Session session, UserGameCommand userGameCommand) {
         try {
-            GameData gameData = gameDAO.getGame(userGameCommand.getGameID());
+            String username = getUsernameFromAuthToken(userGameCommand.getAuthToken());
 
+            GameData gameData = gameDAO.getGame(userGameCommand.getGameID());
             if (gameData == null) {
                 sendError(session, "Game not found.");
                 return;
@@ -60,10 +65,19 @@ public class WebSocketHandler {
 
             connectedClients.put(session, userGameCommand.getAuthToken());
 
+            String message;
+            if (gameData.whiteUsername().equals(username)) {
+                message = "joined as white";
+            } else if (gameData.blackUsername().equals(username)) {
+                message = "joined as black";
+            } else {
+                message = "joined as observer";
+            }
+
             ServerMessage.LoadGameMessage loadGameMessage = new ServerMessage.LoadGameMessage(gameData);
             session.getRemote().sendString(new Gson().toJson(loadGameMessage));
 
-            ServerMessage.NotificationMessage notificationMessage = new ServerMessage.NotificationMessage(userGameCommand.getAuthToken() + " connected to the game.");
+            ServerMessage.NotificationMessage notificationMessage = new ServerMessage.NotificationMessage(username + " " + message);
             broadcastToOtherClients(session, notificationMessage);
         } catch (DataAccessException ex) {
             sendError(session, "Error accessing game data: " + ex.getMessage());
@@ -91,5 +105,19 @@ public class WebSocketHandler {
                         System.err.println("Error broadcasting message: " + ex.getMessage());
                     }
                 });
+    }
+
+    private String getUsernameFromAuthToken(String authToken) {
+        try {
+            AuthData authData = authDAO.getAuth(authToken);
+
+            if (authData != null) {
+                return authData.username();
+            } else {
+                return "Username not found.";
+            }
+        } catch (DataAccessException ex) {
+            return "Error retrieving username: " + ex.getMessage();
+        }
     }
 }
