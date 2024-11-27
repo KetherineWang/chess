@@ -1,20 +1,27 @@
 package client;
 
+import com.google.gson.Gson;
 import model.*;
 import ui.ChessBoardUI;
 import exception.ResponseException;
+import client.websocket.WebSocketCommunicator;
+import websocket.ServerMessageObserver;
+import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
 import java.util.List;
 
-public class ChessClient {
+public class ChessClient implements ServerMessageObserver {
     private final ServerFacade serverFacade;
     private final ChessApp chessApp;
     private String authToken;
     private List<GameData> currentGameList;
+    private WebSocketCommunicator webSocketCommunicator;
 
     public ChessClient(String serverURL, ChessApp chessApp) {
         this.serverFacade = new ServerFacade(serverURL);
         this.chessApp = chessApp;
+        this.webSocketCommunicator = new WebSocketCommunicator(this);
     }
 
     public String register(String username, String password, String email) {
@@ -179,5 +186,45 @@ public class ChessClient {
 
     public List<GameData> getCurrentGameList() {
         return currentGameList;
+    }
+
+    public String connectToGame(int gameID) {
+        try {
+            String wsURL = "ws://localhost:8080/ws";
+            webSocketCommunicator.connect(wsURL);
+
+            // Create and send CONNECT command
+            UserGameCommand connectCommand = new UserGameCommand(
+                    UserGameCommand.CommandType.CONNECT, authToken, gameID
+            );
+            String jsonCommand = new Gson().toJson(connectCommand);
+            webSocketCommunicator.send(jsonCommand);
+
+            return "Connecting to game " + gameID + "...";
+        } catch (Exception e) {
+            return "Error connecting to game: " + e.getMessage();
+        }
+    }
+
+    @Override
+    public void notify(ServerMessage message) {
+        switch (message.getServerMessageType()) {
+            case LOAD_GAME -> handleLoadGame((ServerMessage.LoadGameMessage) message);
+            case NOTIFICATION -> displayNotification(((ServerMessage.NotificationMessage) message).getMessage());
+            case ERROR -> displayError(((ErrorMessage) message).getErrorMessage());
+        }
+    }
+
+    private void handleLoadGame(ServerMessage.LoadGameMessage message) {
+//        ChessBoardUI.drawGame(message.getGame());
+        ChessBoardUI.drawInitialBoards();
+    }
+
+    private void displayNotification(String message) {
+        System.out.println("Notification: " + message);
+    }
+
+    private void displayError(String error) {
+        System.err.println("Error: " + error);
     }
 }

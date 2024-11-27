@@ -1,105 +1,95 @@
 package server.websocket;
 
-import dataaccess.DataAccessException;
+import org.eclipse.jetty.websocket.api.*;
+import org.eclipse.jetty.websocket.api.annotations.*;
+
 import model.GameData;
 import dataaccess.GameDAO;
-import dataaccess.MySQLGameDAO;
+import dataaccess.DataAccessException;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import com.google.gson.Gson;
-import org.eclipse.jetty.websocket.api.*;
-import org.eclipse.jetty.websocket.api.annotations.*;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
 public class WebSocketHandler {
-    private final GameDAO gameDAO = new MySQLGameDAO();
-    private final Map<Session, String> clients = new HashMap<>();
+    private final GameDAO gameDAO;
+    private final Map<Session, String> connectedClients = new ConcurrentHashMap<>();
+
+    public WebSocketHandler(GameDAO gameDAO) {
+        this.gameDAO = gameDAO;
+    }
 
     @OnWebSocketConnect
     public void onConnect(Session session) {
-        System.out.println("WebSocket connected: " + session);
+        System.out.println("Client connected: " + session.getRemoteAddress());
     }
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) {
         try {
-            UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
+            UserGameCommand userGameCommand = new Gson().fromJson(message, UserGameCommand.class);
 
-            if (command.getCommandType() == UserGameCommand.CommandType.CONNECT) {
-                handleConnectCommand(session, command);
+            if (userGameCommand.getCommandType() == UserGameCommand.CommandType.CONNECT) {
+                handleConnectCommand(session, userGameCommand);
             } else {
-                System.out.println("Unsupported command received: " + command.getCommandType());
+                sendError(session, "Unsupported command: " + userGameCommand.getCommandType());
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    private void handleConnectCommand(Session session, UserGameCommand command) {
-        try {
-            if(command.getAuthToken() == null || command.getGameID() == null) {
-                sendErrorMessage(session, "Invalid CONNECT command. Missing auth token or game ID.");
-                return;
-            }
-
-            GameData gameData = gameDAO.getGame(command.getGameID());
-            if (gameData == null) {
-                sendErrorMessage(session, "Game not found for gameID: " + command.getGameID());
-                return;
-            }
-
-            clients.put(session, command.getAuthToken());
-
-            ServerMessage.LoadGameMessage loadGame = new ServerMessage.LoadGameMessage(gameData.chessGame());
-            session.getRemote().sendString(new Gson().toJson(loadGame));
-
-            ServerMessage.NotificationMessage notification = new ServerMessage.NotificationMessage(
-                    String.format("User %s joined the game.", command.getAuthToken())
-            );
-            broadcastNotification(session, notification);
-        } catch (DataAccessException ex) {
-            throw new RuntimeException(ex);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        } catch (Exception e) {
-            e.printStackTrace();
-            sendErrorMessage(session, "An error occurred while processing the CONNECT command.");
-        }
-    }
-
-    private void sendErrorMessage(Session session, String errorMessage) {
-        try {
-            ServerMessage.ErrorMessage error = new ServerMessage.ErrorMessage(errorMessage);
-            session.getRemote().sendString(new Gson().toJson(error));
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void broadcastNotification(Session session, ServerMessage.NotificationMessage notification) {
-        try {
-            String notificationJson = new Gson().toJson(notification);
-
-            for (Session s : clients.keySet()) {
-                if (s != session && s.isOpen()) {
-                    s.getRemote().sendString(notificationJson);
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            sendError(session, "Invalid message format: " + ex.getMessage());
         }
     }
 
     @OnWebSocketClose
-    public void onClose(Session session, String reason) {
-        System.out.println("WebSocket closed: " + session + " Reason: " + reason);
-        clients.remove(session);
+    public void onClose(Session session, int statusCode, String reason) {
+        connectedClients.remove(session);
+        System.out.println("Client disconnected: " + session.getRemoteAddress());
+    }
+
+    private void handleConnectCommand(Session session, UserGameCommand userGameCommand) {
+        try {
+            GameData gameData = gameDAO.getGame(userGameCommand.getGameID());
+
+            if (gameData == null) {
+                sendError(session, "Game not found.");
+                return;
+            }
+
+            connectedClients.put(session, userGameCommand.getAuthToken());
+
+            ServerMessage.LoadGameMessage loadGameMessage = new ServerMessage.LoadGameMessage(gameData);
+            session.getRemote().sendString(new Gson().toJson(loadGameMessage));
+
+            ServerMessage.NotificationMessage notificationMessage = new ServerMessage.NotificationMessage(userGameCommand.getAuthToken() + " connected to the game.");
+            broadcastToOtherClients(session, notificationMessage);
+        } catch (DataAccessException ex) {
+            sendError(session, "Error accessing game data: " + ex.getMessage());
+        } catch (Exception e) {
+            sendError(session, "Error handling CONNECT command: " + e.getMessage());
+        }
+    }
+
+    private void sendError(Session session, String errorMessage) {
+        try {
+            ServerMessage.ErrorMessage error = new ServerMessage.ErrorMessage(errorMessage);
+            session.getRemote().sendString(new Gson().toJson(error));
+        } catch (Exception ex) {
+            System.err.println("Error sending error message: " + ex.getMessage());
+        }
+    }
+
+    private void broadcastToOtherClients(Session sender, ServerMessage message) {
+        connectedClients.keySet().stream()
+                .filter(session -> !session.equals(sender))
+                .forEach(session -> {
+                    try {
+                        session.getRemote().sendString(new Gson().toJson(message));
+                    } catch (Exception ex) {
+                        System.err.println("Error broadcasting message: " + ex.getMessage());
+                    }
+                });
     }
 }
