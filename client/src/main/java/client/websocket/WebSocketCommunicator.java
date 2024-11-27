@@ -1,50 +1,57 @@
 package client.websocket;
 
 import com.google.gson.Gson;
-import websocket.ServerMessageObserver;
-import websocket.messages.ServerMessage;
-
 import javax.websocket.*;
 import java.net.URI;
 
-public class WebSocketCommunicator {
-    private Session session;
-    private final ServerMessageObserver observer;
+import websocket.ServerMessageObserver;
+import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
-    public WebSocketCommunicator(ServerMessageObserver observer) {
-        this.observer = observer;
+public class WebSocketCommunicator extends Endpoint {
+    private final ServerMessageObserver serverMessageObserver;
+    private Session session;
+
+    public WebSocketCommunicator(ServerMessageObserver serverMessageObserver) {
+        this.serverMessageObserver = serverMessageObserver;
     }
 
     public void connect(String wsURL) throws Exception {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-        this.session = container.connectToServer(new Endpoint() {
-            @Override
-            public void onOpen(Session session, EndpointConfig config) {
-                System.out.println("WebSocket client connection established.");
-                session.addMessageHandler(String.class, this::onMessage);
-            }
+        this.session = container.connectToServer(this, new URI(wsURL));
 
-            private void onMessage(String message) {
-                try {
-                    ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
-                } catch (Exception ex) {
-                    observer.notify(new ErrorMessage("Error parsing WebSocket server message: " + ex.getMessage()));
-                }
-            }
-        }, URI.create(wsURL));
+        this.session.addMessageHandler(String.class, this::onMessage);
+    }
+
+    @Override
+    public void onOpen(Session session, EndpointConfig endpointConfig) {
+        System.out.println("Connected to WebSocket server.");
+    }
+
+    public void onMessage(String message) {
+        try {
+            ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
+            serverMessageObserver.notify(serverMessage);
+        } catch (Exception ex) {
+            serverMessageObserver.notify(new ServerMessage.ErrorMessage("Error processing server message: " + ex.getMessage()));
+        }
+    }
+
+    @Override
+    public void onClose(Session session, CloseReason closeReason) {
+        System.out.println("Disconnected from WebSocket server: "  + closeReason.getReasonPhrase());
+    }
+
+    @Override
+    public void onError(Session session, Throwable throwable) {
+        System.err.println("WebSocket error: " + throwable.getMessage());
     }
 
     public void send(String message) throws Exception {
         if (session != null && session.isOpen()) {
             session.getBasicRemote().sendText(message);
         } else {
-            throw new IllegalStateException("WebSocket client is not connected.");
-        }
-    }
-
-    public void close() throws Exception {
-        if (session != null) {
-            session.close();
+            throw new IllegalStateException("Cannot send message: WebSocket session is not open.");
         }
     }
 }

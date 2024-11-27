@@ -15,6 +15,7 @@ public class ChessClient implements ServerMessageObserver {
     private final ServerFacade serverFacade;
     private final ChessApp chessApp;
     private String authToken;
+    private String username;
     private List<GameData> currentGameList;
     private WebSocketCommunicator webSocketCommunicator;
 
@@ -30,6 +31,7 @@ public class ChessClient implements ServerMessageObserver {
             RegisterResult registerResult = serverFacade.register(registerRequest);
 
             this.authToken = registerResult.authToken();
+            this.username = registerResult.username();
 
             chessApp.switchToPostLogin();
 
@@ -120,7 +122,12 @@ public class ChessClient implements ServerMessageObserver {
             JoinGameRequest joinGameRequest = new JoinGameRequest(gameID, playerColor);
             serverFacade.joinGame(authToken, joinGameRequest);
 
-            ChessBoardUI.drawInitialBoards();
+            String connectionResult = connectToGame(gameID);
+            if (connectionResult.startsWith("Error")) {
+                return connectionResult;
+            }
+
+//            chessApp.switchToGameplayRepl();
 
             return String.format("Successfully joined game %d as %s player.", gameNumber, playerColor);
         } catch (ResponseException ex) {
@@ -131,9 +138,18 @@ public class ChessClient implements ServerMessageObserver {
     }
 
     public String observeGame(int gameNumber, int gameID) {
-        ChessBoardUI.drawInitialBoards();
+        try {
+            String connectionResult = connectToGame(gameID);
+            if (connectionResult.startsWith("Error")) {
+                return connectionResult;
+            }
 
-        return String.format("Observing game %d.", gameNumber);
+//            chessApp.switchToGameplayRepl();
+
+            return String.format("Observing game %d.", gameNumber);
+        } catch (Exception ex) {
+            return "Error: An unexpected error occurred while observing a game.";
+        }
     }
 
     private String handleError(ResponseException ex, String action) {
@@ -191,40 +207,29 @@ public class ChessClient implements ServerMessageObserver {
     public String connectToGame(int gameID) {
         try {
             String wsURL = "ws://localhost:8080/ws";
+            WebSocketCommunicator webSocketCommunicator = new WebSocketCommunicator(this);
             webSocketCommunicator.connect(wsURL);
 
-            // Create and send CONNECT command
             UserGameCommand connectCommand = new UserGameCommand(
                     UserGameCommand.CommandType.CONNECT, authToken, gameID
             );
-            String jsonCommand = new Gson().toJson(connectCommand);
-            webSocketCommunicator.send(jsonCommand);
+            webSocketCommunicator.send(new Gson().toJson(connectCommand));
 
-            return "Connecting to game " + gameID + "...";
-        } catch (Exception e) {
-            return "Error connecting to game: " + e.getMessage();
+            return "Connected to game!";
+        } catch (Exception ex) {
+            return "Error connection to game: " + ex.getMessage();
         }
     }
 
     @Override
-    public void notify(ServerMessage message) {
-        switch (message.getServerMessageType()) {
-            case LOAD_GAME -> handleLoadGame((ServerMessage.LoadGameMessage) message);
-            case NOTIFICATION -> displayNotification(((ServerMessage.NotificationMessage) message).getMessage());
-            case ERROR -> displayError(((ErrorMessage) message).getErrorMessage());
+    public void notify(ServerMessage serverMessage) {
+        switch(serverMessage.getServerMessageType()) {
+            case NOTIFICATION -> System.out.println("Notification: " + username + " connected to the game.");
+            case ERROR -> System.err.println("Error: " + ((ServerMessage.ErrorMessage) serverMessage).getErrorMessage());
+            case LOAD_GAME -> {
+//                GameData gameData = ((ServerMessage.LoadGameMessage) serverMessage).getGame();
+                ChessBoardUI.drawInitialBoards();
+            }
         }
-    }
-
-    private void handleLoadGame(ServerMessage.LoadGameMessage message) {
-//        ChessBoardUI.drawGame(message.getGame());
-        ChessBoardUI.drawInitialBoards();
-    }
-
-    private void displayNotification(String message) {
-        System.out.println("Notification: " + message);
-    }
-
-    private void displayError(String error) {
-        System.err.println("Error: " + error);
     }
 }

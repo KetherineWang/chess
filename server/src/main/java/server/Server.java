@@ -1,15 +1,15 @@
 package server;
 
-import server.websocket.WebSocketHandler;
 import service.*;
 import dataaccess.*;
 import model.*;
-
-import java.util.List;
+import server.websocket.WebSocketHandler;
+import exception.ResponseException;
 
 import spark.*;
 import com.google.gson.Gson;
-import exception.ResponseException;
+
+import java.util.List;
 
 public class Server {
     private final UserDAO userDAO;
@@ -22,6 +22,7 @@ public class Server {
     private final ListGamesService listGamesService;
     private final CreateGameService createGameService;
     private final JoinGameService joinGameService;
+    private final WebSocketHandler webSocketHandler;
 
     public Server() {
         try {
@@ -33,6 +34,7 @@ public class Server {
         this.userDAO = new MySQLUserDAO();
         this.authDAO = new MySQLAuthDAO();
         this.gameDAO = new MySQLGameDAO();
+
         this.clearService = new ClearService(userDAO, authDAO, gameDAO);
         this.registerService = new RegisterService(userDAO, authDAO);
         this.loginService = new LoginService(userDAO, authDAO);
@@ -40,6 +42,8 @@ public class Server {
         this.listGamesService = new ListGamesService(authDAO, gameDAO);
         this.createGameService = new CreateGameService(authDAO, gameDAO);
         this.joinGameService = new JoinGameService(authDAO, gameDAO);
+
+        webSocketHandler = new WebSocketHandler(gameDAO);
     }
 
     public int run(int desiredPort) {
@@ -48,7 +52,7 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-        Spark.webSocket("/ws", WebSocketHandler.class);
+        Spark.webSocket("/ws", webSocketHandler);
         Spark.delete("/db", this::clearDatabase);
         Spark.post("/user", this::registerUser);
         Spark.post("/session", this::loginUser);
