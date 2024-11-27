@@ -8,6 +8,9 @@ import client.websocket.WebSocketCommunicator;
 import websocket.ServerMessageObserver;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ErrorMessage;
 
 import java.util.List;
 
@@ -224,10 +227,10 @@ public class ChessClient implements ServerMessageObserver {
     @Override
     public void notify(ServerMessage serverMessage) {
         switch(serverMessage.getServerMessageType()) {
-            case NOTIFICATION -> System.out.println("Notification: " + username + " connected to the game.");
-            case ERROR -> System.err.println("Error: " + ((ServerMessage.ErrorMessage) serverMessage).getErrorMessage());
+            case NOTIFICATION -> System.out.println(((NotificationMessage) serverMessage).getMessage());
+            case ERROR -> System.err.println("Error: " + ((ErrorMessage) serverMessage).getErrorMessage());
             case LOAD_GAME -> {
-//                GameData gameData = ((ServerMessage.LoadGameMessage) serverMessage).getGame();
+                GameData gameData = ((LoadGameMessage) serverMessage).getGame();
                 ChessBoardUI.drawInitialBoards();
             }
         }

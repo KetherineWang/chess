@@ -1,19 +1,26 @@
 package client.websocket;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import javax.websocket.*;
 import java.net.URI;
 
-import websocket.ServerMessageObserver;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
+import websocket.messages.ErrorMessage;
+import websocket.ServerMessageObserver;
+import websocket.messages.ServerMessageDeserializer;
 
 public class WebSocketCommunicator extends Endpoint {
     private final ServerMessageObserver serverMessageObserver;
     private Session session;
+    private final Gson gson;
 
     public WebSocketCommunicator(ServerMessageObserver serverMessageObserver) {
         this.serverMessageObserver = serverMessageObserver;
+        this.gson = new GsonBuilder()
+                .registerTypeAdapter(ServerMessage.class, new ServerMessageDeserializer())
+                .create();
     }
 
     public void connect(String wsURL) throws Exception {
@@ -30,10 +37,10 @@ public class WebSocketCommunicator extends Endpoint {
 
     public void onMessage(String message) {
         try {
-            ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
+            ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
             serverMessageObserver.notify(serverMessage);
         } catch (Exception ex) {
-            serverMessageObserver.notify(new ServerMessage.ErrorMessage("Error processing server message: " + ex.getMessage()));
+            serverMessageObserver.notify(new ErrorMessage("Error processing server message: " + ex.getMessage()));
         }
     }
 
