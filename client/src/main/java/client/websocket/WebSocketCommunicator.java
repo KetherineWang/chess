@@ -1,13 +1,10 @@
 package client.websocket;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import javax.websocket.*;
 import java.net.URI;
-
-import websocket.commands.UserGameCommand;
-import websocket.messages.ServerMessage;
 import websocket.messages.ErrorMessage;
+import websocket.messages.ServerMessage;
 import websocket.ServerMessageObserver;
 import websocket.messages.ServerMessageDeserializer;
 
@@ -18,9 +15,7 @@ public class WebSocketCommunicator extends Endpoint {
 
     public WebSocketCommunicator(ServerMessageObserver serverMessageObserver) {
         this.serverMessageObserver = serverMessageObserver;
-        this.gson = new GsonBuilder()
-                .registerTypeAdapter(ServerMessage.class, new ServerMessageDeserializer())
-                .create();
+        this.gson = new GsonBuilder().registerTypeAdapter(ServerMessage.class, new ServerMessageDeserializer()).create();
     }
 
     public void connect(String wsURL) throws Exception {

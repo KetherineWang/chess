@@ -50,29 +50,26 @@ public class WebSocketHandler {
                 return;
             }
 
-            String role = determineRole(username, gameData);
+            String role;
+            if (username.equals(gameData.whiteUsername())) {
+                role = "joined as white";
+            } else if (username.equals(gameData.blackUsername())) {
+                role = "joined as black";
+            } else {
+                role = "joined as observer";
+            }
 
-            connections.add(username, session);
+            connections.add(command.getGameID(), username, session);
 
             LoadGameMessage loadGameMessage = new LoadGameMessage(gameData);
-            connections.getConnection(username).send(gson.toJson(loadGameMessage));
+            connections.getConnection(command.getGameID(), username).send(gson.toJson(loadGameMessage));
 
             NotificationMessage notificationMessage = new NotificationMessage(username + " " + role);
-            connections.broadcast(username, gson.toJson(notificationMessage));
+            connections.broadcast(command.getGameID(), username, gson.toJson(notificationMessage));
         } catch (DataAccessException ex) {
             sendError(session, "Error accessing game data: " + ex.getMessage());
         } catch (Exception e) {
             sendError(session, "Error handling CONNECT command: " + e.getMessage());
-        }
-    }
-
-    private String determineRole(String username, GameData gameData) {
-        if (username.equals(gameData.whiteUsername())) {
-            return "joined as white";
-        } else if (username.equals(gameData.blackUsername())) {
-            return "joined as black";
-        } else {
-            return "joined as observer";
         }
     }
 

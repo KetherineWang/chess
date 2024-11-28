@@ -8,9 +8,9 @@ public class ServerMessageDeserializer implements JsonDeserializer<ServerMessage
     @Override
     public ServerMessage deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         JsonObject jsonObject = json.getAsJsonObject();
-        ServerMessage.ServerMessageType messageType = ServerMessage.ServerMessageType.valueOf(jsonObject.get("serverMessageType").getAsString());
+        ServerMessage.ServerMessageType serverMessageType = ServerMessage.ServerMessageType.valueOf(jsonObject.get("serverMessageType").getAsString());
 
-        switch (messageType) {
+        switch (serverMessageType) {
             case NOTIFICATION:
                 return new Gson().fromJson(jsonObject, NotificationMessage.class);
             case ERROR:
@@ -18,7 +18,7 @@ public class ServerMessageDeserializer implements JsonDeserializer<ServerMessage
             case LOAD_GAME:
                 return new Gson().fromJson(jsonObject, LoadGameMessage.class);
             default:
-                throw new JsonParseException("Unknown server message type: " + messageType);
+                throw new JsonParseException("Unknown server message type: " + serverMessageType);
         }
     }
 }

@@ -1,6 +1,11 @@
 package ui;
 
+import chess.ChessBoard;
+import chess.ChessPiece;
+import chess.ChessPosition;
+
 import java.io.PrintStream;
+
 import static ui.EscapeSequences.*;
 
 public class ChessBoardUI {
@@ -28,7 +33,7 @@ public class ChessBoardUI {
             {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_KING, BLACK_QUEEN, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK}
     };
 
-    public static void drawInitialBoards() {
+    public static void drawChessBoard(ChessBoard chessBoard, boolean whiteBottom) {
         PrintStream out = System.out;
         out.print(ERASE_SCREEN);
 
