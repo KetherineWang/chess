@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessBoard;
 import com.google.gson.Gson;
 import model.*;
 import ui.ChessBoardUI;
@@ -230,8 +231,14 @@ public class ChessClient implements ServerMessageObserver {
             case NOTIFICATION -> System.out.println(((NotificationMessage) serverMessage).getMessage());
             case ERROR -> System.err.println("Error: " + ((ErrorMessage) serverMessage).getErrorMessage());
             case LOAD_GAME -> {
-                GameData gameData = ((LoadGameMessage) serverMessage).getGame();
-                ChessBoardUI.drawInitialBoards();
+                LoadGameMessage loadGameMessage = (LoadGameMessage) serverMessage;
+                GameData gameData = loadGameMessage.getGame();
+
+                String role = loadGameMessage.getRole();
+                boolean whiteBottom = "white".equalsIgnoreCase(role) || "observer".equalsIgnoreCase(role);
+
+                ChessBoard chessBoard = gameData.chessGame().getBoard();
+                ChessBoardUI.drawChessBoard(chessBoard, whiteBottom);
             }
         }
     }

@@ -6,14 +6,20 @@ import java.util.Objects;
 
 public class LoadGameMessage extends ServerMessage {
     private final GameData game;
+    private final String role;
 
-    public LoadGameMessage(GameData game) {
+    public LoadGameMessage(GameData game, String role) {
         super(ServerMessageType.LOAD_GAME);
         this.game = game;
+        this.role = role;
     }
 
     public GameData getGame() {
         return game;
+    }
+
+    public String getRole() {
+        return role;
     }
 
     @Override

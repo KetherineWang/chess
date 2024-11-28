@@ -52,19 +52,19 @@ public class WebSocketHandler {
 
             String role;
             if (username.equals(gameData.whiteUsername())) {
-                role = "joined as white";
+                role = "white";
             } else if (username.equals(gameData.blackUsername())) {
-                role = "joined as black";
+                role = "black";
             } else {
-                role = "joined as observer";
+                role = "observer";
             }
 
             connections.add(command.getGameID(), username, session);
 
-            LoadGameMessage loadGameMessage = new LoadGameMessage(gameData);
+            LoadGameMessage loadGameMessage = new LoadGameMessage(gameData, role);
             connections.getConnection(command.getGameID(), username).send(gson.toJson(loadGameMessage));
 
-            NotificationMessage notificationMessage = new NotificationMessage(username + " " + role);
+            NotificationMessage notificationMessage = new NotificationMessage(username + " joined as " + role);
             connections.broadcast(command.getGameID(), username, gson.toJson(notificationMessage));
         } catch (DataAccessException ex) {
             sendError(session, "Error accessing game data: " + ex.getMessage());
