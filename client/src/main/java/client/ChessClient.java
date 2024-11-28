@@ -131,7 +131,7 @@ public class ChessClient implements ServerMessageObserver {
                 return connectionResult;
             }
 
-//            chessApp.switchToGameplayRepl();
+            chessApp.switchToGameplay();
 
             return String.format("Successfully joined game %d as %s player.", gameNumber, playerColor);
         } catch (ResponseException ex) {
@@ -148,12 +148,24 @@ public class ChessClient implements ServerMessageObserver {
                 return connectionResult;
             }
 
-//            chessApp.switchToGameplayRepl();
+            chessApp.switchToGameplay();
 
             return String.format("Observing game %d.", gameNumber);
         } catch (Exception ex) {
             return "Error: An unexpected error occurred while observing a game.";
         }
+    }
+
+    public String makeMove(String startPosition, String endPosition) {
+        return null;
+    }
+
+    public String leaveGame() {
+        return null;
+    }
+
+    public String resignGame() {
+        return null;
     }
 
     private String handleError(ResponseException ex, String action) {

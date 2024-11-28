@@ -133,7 +133,7 @@ public class PostLoginRepl implements Repl {
                 observe <GAME NUMBER>                              - to observe a game
                 quit                                               - to exit the application
                 help                                               - to display available commands (this message)
-                """;
+               """;
     }
 
     @Override

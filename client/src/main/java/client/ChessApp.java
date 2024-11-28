@@ -9,6 +9,7 @@ public class ChessApp {
     private final ChessClient chessClient;
     private final PreLoginRepl preLoginRepl;
     private PostLoginRepl postLoginRepl;
+    private GameplayRepl gameplayRepl;
 
     public ChessApp(String serverURL) {
         this.chessClient = new ChessClient(serverURL, this);
@@ -41,5 +42,10 @@ public class ChessApp {
 
     public void switchToPreLogin() {
         this.currentRepl = preLoginRepl;
+    }
+
+    public void switchToGameplay() {
+        this.gameplayRepl = new GameplayRepl(chessClient);
+        this.currentRepl = gameplayRepl;
     }
 }

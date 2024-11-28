@@ -71,7 +71,7 @@ public class PreLoginRepl implements Repl {
                 login <USERNAME> <PASSWORD>                - to log in
                 quit                                       - to exit the application
                 help                                       - to display available commands (this message)
-                """;
+               """;
     }
 
     @Override

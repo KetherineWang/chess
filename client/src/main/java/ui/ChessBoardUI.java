@@ -22,10 +22,6 @@ public class ChessBoardUI {
     }
 
     private static void drawBoard(PrintStream out, ChessBoard chessBoard, boolean whiteBottom) {
-//        String[] columns = whiteBottom ? new String[] {"a", "b", "c", "d", "e", "f", "g", "h"} :
-//                                         new String[] {"h", "g", "f", "e", "d", "c", "b", "a"};
-//        String[] rows = whiteBottom ? new String[] {"8", "7", "6", "5", "4", "3", "2", "1"} :
-//                                      new String[] {"1", "2", "3", "4", "5", "6", "7", "8"};
         String[] rows = new String[] {"1", "2", "3", "4", "5", "6", "7", "8"};
         String[] columns = whiteBottom ? new String[] {"a", "b", "c", "d", "e", "f", "g", "h"} : new String[] {"h", "g", "f", "e", "d", "c", "b", "a"};
         ChessPiece[][] board = chessBoard.getBoard();
@@ -42,7 +38,7 @@ public class ChessBoardUI {
 
             for (int j = 0; j < board[rowIndex].length; j++) {
                 int columnIndex = whiteBottom ? j : 7 - j;
-                boolean isLightSquare = (rowIndex + columnIndex) % 2 == 0;
+                boolean isLightSquare = (rowIndex + columnIndex) % 2 != 0;
 
                 setSquareColor(out, isLightSquare);
 
