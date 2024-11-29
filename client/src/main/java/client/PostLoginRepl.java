@@ -127,10 +127,10 @@ public class PostLoginRepl implements Repl {
         return """
                 Available commands:
                 logout                                             - to log out
-                create <GAME NAME>                                 - to create a game
+                create <GAME_NAME>                                 - to create a game
                 list                                               - to list games
-                join <GAME NUMBER> <PLAYER COLOR: WHITE|BLACK>     - to join a game
-                observe <GAME NUMBER>                              - to observe a game
+                join <GAME_NUMBER> <PLAYER_COLOR|WHITE/BLACK>      - to join a game
+                observe <GAME_NUMBER>                              - to observe a game
                 quit                                               - to exit the application
                 help                                               - to display available commands (this message)
                """;

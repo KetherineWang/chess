@@ -1,14 +1,20 @@
 package client;
 
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
+
 import java.util.Arrays;
 
 import static ui.EscapeSequences.*;
 
 public class GameplayRepl implements Repl {
     private final ChessClient chessClient;
+    private final int gameID;
 
-    public GameplayRepl(ChessClient chessClient) {
+    public GameplayRepl(ChessClient chessClient, int gameID) {
         this.chessClient = chessClient;
+        this.gameID = gameID;
     }
 
     @Override
@@ -36,14 +42,24 @@ public class GameplayRepl implements Repl {
     }
 
     private String handleMove(String[] args) {
-        if (args.length != 2) {
-            return "Error: Make move requires 2 arguments: 'move <START_POSITION> <END_POSITION>'.";
+        if (args.length < 2 || args.length > 3) {
+            return "Error: Make move requires 2 or 3 arguments: 'move <START_POSITION> <END_POSITION> [PROMOTION_PIECE]'.";
         }
 
         try {
-            String startPosition = args[0];
-            String endPosition = args[1];
-            return chessClient.makeMove(startPosition, endPosition);
+            ChessPosition startPosition = parsePosition(args[0]);
+            ChessPosition endPosition = parsePosition(args[1]);
+
+            ChessPiece.PieceType promotionPiece = null;
+            if (args.length == 3) {
+                promotionPiece = parsePromotionPiece(args[2]);
+            }
+
+            ChessMove chessMove = new ChessMove(startPosition, endPosition, promotionPiece);
+
+            return chessClient.makeMove(gameID, chessMove);
+        } catch (IllegalArgumentException ex) {
+            return "Error: " + ex.getMessage();
         } catch (Exception ex) {
             return "Error: Unable to make move. " + ex.getMessage();
         }
@@ -62,6 +78,42 @@ public class GameplayRepl implements Repl {
             return chessClient.resignGame();
         } catch (Exception ex) {
             return "Error: Unable to resign." + ex.getMessage();
+        }
+    }
+
+    private ChessPosition parsePosition(String positionInput) {
+        if (positionInput.length() != 2) {
+            throw new IllegalArgumentException("Invalid position input format. Use a column (a-h) followed by a row (1-8).");
+        }
+
+        char columnChar = positionInput.charAt(0);
+        char rowChar = positionInput.charAt(1);
+
+        int column = columnChar - 'a' + 1;
+        if (column < 1 || column > 8) {
+            throw new IllegalArgumentException("Invalid column. Use a letter between 'a' and 'h',");
+        }
+
+        int row = rowChar - '1' + 1;
+        if (row < 1 || row > 8) {
+            throw new IllegalArgumentException("Invalid row. Use a number between '1' and '8'.");
+        }
+
+        return new ChessPosition(row, column);
+    }
+
+    private ChessPiece.PieceType parsePromotionPiece(String promotionPiece) {
+        switch (promotionPiece.toLowerCase()) {
+            case "queen":
+                return ChessPiece.PieceType.QUEEN;
+            case "bishop":
+                return ChessPiece.PieceType.BISHOP;
+            case "knight":
+                return ChessPiece.PieceType.KNIGHT;
+            case "rook":
+                return ChessPiece.PieceType.ROOK;
+            default:
+                throw new IllegalArgumentException("Invalid promotion piece. Valid options are: queen, bishop, knight, rook.");
         }
     }
 

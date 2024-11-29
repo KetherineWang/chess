@@ -71,12 +71,12 @@ public class ChessBoardUI {
                 return piece.getTeamColor() == chess.ChessGame.TeamColor.WHITE ? WHITE_KING : BLACK_KING;
             case QUEEN:
                 return piece.getTeamColor() == chess.ChessGame.TeamColor.WHITE ? WHITE_QUEEN : BLACK_QUEEN;
-            case ROOK:
-                return piece.getTeamColor() == chess.ChessGame.TeamColor.WHITE ? WHITE_ROOK : BLACK_ROOK;
             case BISHOP:
                 return piece.getTeamColor() == chess.ChessGame.TeamColor.WHITE ? WHITE_BISHOP : BLACK_BISHOP;
             case KNIGHT:
                 return piece.getTeamColor() == chess.ChessGame.TeamColor.WHITE ? WHITE_KNIGHT :BLACK_KNIGHT;
+            case ROOK:
+                return piece.getTeamColor() == chess.ChessGame.TeamColor.WHITE ? WHITE_ROOK : BLACK_ROOK;
             case PAWN:
                 return piece.getTeamColor() == chess.ChessGame.TeamColor.WHITE ? WHITE_PAWN : BLACK_PAWN;
             default:

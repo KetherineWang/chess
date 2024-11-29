@@ -2,6 +2,7 @@ package server.websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPosition;
 import chess.InvalidMoveException;
 import dataaccess.AuthDAO;
 import dataaccess.GameDAO;
@@ -97,8 +98,11 @@ public class WebSocketHandler {
 
             LoadGameMessage loadGameMessage = new LoadGameMessage(gameData, role);
             connections.getConnection(makeMoveCommand.getGameID(), username).send(gson.toJson(loadGameMessage));
+            connections.broadcast(makeMoveCommand.getGameID(), username, gson.toJson(loadGameMessage));
 
-            String makeMoveMessage = String.format("%s moved from %s to %s", username, chessMove.getStartPosition(), chessMove.getEndPosition());
+            String startPosition = reformatPosition(chessMove.getStartPosition());
+            String endPosition = reformatPosition(chessMove.getEndPosition());
+            String makeMoveMessage = String.format("%s moved from %s to %s", username, startPosition, endPosition);
             NotificationMessage makeMoveNotification = new NotificationMessage(makeMoveMessage);
             connections.broadcast(makeMoveCommand.getGameID(), username, gson.toJson(makeMoveNotification));
 
@@ -163,6 +167,17 @@ public class WebSocketHandler {
         } else {
             return "observer";
         }
+    }
+
+    private String reformatPosition(ChessPosition chessPosition) {
+        if (chessPosition == null) {
+            return "";
+        }
+
+        char columnChar = (char) ('a' + chessPosition.getColumn() - 1);
+
+        int row = chessPosition.getRow();
+        return String.valueOf(columnChar) + row;
     }
 
     private void sendError(Session session, String error) throws IOException {

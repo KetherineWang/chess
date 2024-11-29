@@ -1,17 +1,19 @@
 package client;
 
+import chess.ChessMove;
 import chess.ChessBoard;
-import com.google.gson.Gson;
 import model.*;
 import ui.ChessBoardUI;
-import exception.ResponseException;
 import client.websocket.WebSocketCommunicator;
 import websocket.ServerMessageObserver;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ServerMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ErrorMessage;
+import websocket.messages.ServerMessage;
+import com.google.gson.Gson;
+import exception.ResponseException;
 
 import java.util.List;
 
@@ -33,12 +35,10 @@ public class ChessClient implements ServerMessageObserver {
         try {
             RegisterRequest registerRequest = new RegisterRequest(username, password, email);
             RegisterResult registerResult = serverFacade.register(registerRequest);
-
             this.authToken = registerResult.authToken();
             this.username = registerResult.username();
 
             chessApp.switchToPostLogin();
-
             return String.format("Registration successful. You are now logged in as %s.", username);
         } catch (ResponseException ex) {
             return handleError(ex, "register");
@@ -51,11 +51,10 @@ public class ChessClient implements ServerMessageObserver {
         try {
             LoginRequest loginRequest = new LoginRequest(username, password);
             LoginResult loginResult = serverFacade.login(loginRequest);
-
             this.authToken = loginResult.authToken();
+            this.username = loginResult.username();
 
             chessApp.switchToPostLogin();
-
             return String.format("Login successful. You are now logged in as %s.", username);
         } catch (ResponseException ex) {
             return handleError(ex, "login");
@@ -69,11 +68,9 @@ public class ChessClient implements ServerMessageObserver {
 
         try {
             serverFacade.logout(authToken);
-
             authToken = null;
 
             chessApp.switchToPreLogin();
-
             return "Logged out successfully.";
         } catch (ResponseException ex) {
             return handleError(ex, "logout");
@@ -104,7 +101,6 @@ public class ChessClient implements ServerMessageObserver {
             currentGameList = serverFacade.listGames(authToken);
 
             StringBuilder listGamesResponse = new StringBuilder("Available games:\n");
-
             for (int i = 0; i < currentGameList.size(); i++) {
                 GameData game = currentGameList.get(i);
                 listGamesResponse.append(String.format("%d. %s (WHITE: %s, BLACK: %s)\n",
@@ -126,13 +122,9 @@ public class ChessClient implements ServerMessageObserver {
             JoinGameRequest joinGameRequest = new JoinGameRequest(gameID, playerColor);
             serverFacade.joinGame(authToken, joinGameRequest);
 
-            String connectionResult = connectToGame(gameID);
-            if (connectionResult.startsWith("Error")) {
-                return connectionResult;
-            }
+            connectToGame(gameID);
 
-            chessApp.switchToGameplay();
-
+            chessApp.switchToGameplay(gameID);
             return String.format("Successfully joined game %d as %s player.", gameNumber, playerColor);
         } catch (ResponseException ex) {
             return handleError(ex, "joinGame");
@@ -143,21 +135,23 @@ public class ChessClient implements ServerMessageObserver {
 
     public String observeGame(int gameNumber, int gameID) {
         try {
-            String connectionResult = connectToGame(gameID);
-            if (connectionResult.startsWith("Error")) {
-                return connectionResult;
-            }
+            connectToGame(gameID);
 
-            chessApp.switchToGameplay();
-
+            chessApp.switchToGameplay(gameID);
             return String.format("Observing game %d.", gameNumber);
         } catch (Exception ex) {
             return "Error: An unexpected error occurred while observing a game.";
         }
     }
 
-    public String makeMove(String startPosition, String endPosition) {
-        return null;
+    public String makeMove(int gameID, ChessMove chessMove) {
+        try {
+            MakeMoveCommand makeMoveCommand = new MakeMoveCommand(authToken, gameID, chessMove);
+            webSocketCommunicator.send(new Gson().toJson(makeMoveCommand));
+            return "Move sent to server.";
+        } catch (Exception ex) {
+            return "Error: An unexpected error occurred while sending move to server.";
+        }
     }
 
     public String leaveGame() {
@@ -207,7 +201,7 @@ public class ChessClient implements ServerMessageObserver {
             default:
                 return "Error: " + ex.getMessage();
         }
-        return "Error: Unable to process the request.";
+        return "Error: Unable to process the command.";
     }
 
     private void assertLoggedIn() throws ResponseException {
@@ -223,7 +217,7 @@ public class ChessClient implements ServerMessageObserver {
     public String connectToGame(int gameID) {
         try {
             String wsURL = "ws://localhost:8080/ws";
-            WebSocketCommunicator webSocketCommunicator = new WebSocketCommunicator(this);
+            webSocketCommunicator = new WebSocketCommunicator(this);
             webSocketCommunicator.connect(wsURL);
 
             UserGameCommand connectCommand = new UserGameCommand(
@@ -240,18 +234,25 @@ public class ChessClient implements ServerMessageObserver {
     @Override
     public void notify(ServerMessage serverMessage) {
         switch(serverMessage.getServerMessageType()) {
-            case NOTIFICATION -> System.out.println(((NotificationMessage) serverMessage).getMessage());
-            case ERROR -> System.err.println("Error: " + ((ErrorMessage) serverMessage).getErrorMessage());
+            case NOTIFICATION -> {
+                NotificationMessage notificationMessage = (NotificationMessage) serverMessage;
+                System.out.println(notificationMessage.getMessage());
+            }
             case LOAD_GAME -> {
                 LoadGameMessage loadGameMessage = (LoadGameMessage) serverMessage;
                 GameData gameData = loadGameMessage.getGame();
 
-                String role = loadGameMessage.getRole();
-                boolean whiteBottom = "white".equalsIgnoreCase(role) || "observer".equalsIgnoreCase(role);
+                boolean whiteBottom = username.equals(gameData.whiteUsername()) ||
+                        (!username.equals(gameData.whiteUsername()) && !username.equals(gameData.blackUsername()));
 
                 ChessBoard chessBoard = gameData.chessGame().getBoard();
                 ChessBoardUI.drawChessBoard(chessBoard, whiteBottom);
             }
+            case ERROR -> {
+                ErrorMessage errorMessage = (ErrorMessage) serverMessage;
+                System.err.println("Error: " + errorMessage.getErrorMessage());
+            }
+
         }
     }
 }

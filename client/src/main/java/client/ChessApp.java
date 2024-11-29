@@ -35,17 +35,17 @@ public class ChessApp {
         }
     }
 
+    public void switchToPreLogin() {
+        this.currentRepl = preLoginRepl;
+    }
+
     public void switchToPostLogin() {
         this.postLoginRepl = new PostLoginRepl(chessClient);
         this.currentRepl = postLoginRepl;
     }
 
-    public void switchToPreLogin() {
-        this.currentRepl = preLoginRepl;
-    }
-
-    public void switchToGameplay() {
-        this.gameplayRepl = new GameplayRepl(chessClient);
+    public void switchToGameplay(int gameID) {
+        this.gameplayRepl = new GameplayRepl(chessClient, gameID);
         this.currentRepl = gameplayRepl;
     }
 }
