@@ -13,6 +13,7 @@ public class ChessGame {
     private TeamColor teamTurn;
     private ChessBoard board;
     private boolean gameOver = false;
+    private boolean resigned = false;
 
     public ChessGame() {
         this.board = new ChessBoard();
@@ -44,6 +45,21 @@ public class ChessGame {
         this.gameOver = gameOver;
     }
 
+    public boolean isResigned() {
+        return resigned;
+    }
+
+    public void setResigned(boolean resigned) {
+        this.resigned = resigned;
+    }
+
+    public void resign() throws InvalidMoveException {
+        if (resigned) {
+            throw new InvalidMoveException("A player has already resigned. The game is over.");
+        }
+        this.resigned = true;
+        this.gameOver = true;
+    }
     /**
      * Enum identifying the 2 possible teams in a chess game
      */

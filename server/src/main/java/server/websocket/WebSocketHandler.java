@@ -158,7 +158,19 @@ public class WebSocketHandler {
             }
 
             ChessGame chessGame = gameData.chessGame();
-            chessGame.setGameOver(true);
+
+            String role = determineRole(username, gameData);
+            if (role.equals("observer")) {
+                sendError(session, "You are not authorized to resign from this game.");
+                return;
+            }
+
+            if (chessGame.isResigned()) {
+                sendError(session, "A player has already resigned. The game is over.");
+                return;
+            }
+
+            chessGame.resign();
 
             try {
                 gameDAO.updateGame(new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), chessGame));

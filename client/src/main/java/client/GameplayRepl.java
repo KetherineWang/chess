@@ -75,7 +75,7 @@ public class GameplayRepl implements Repl {
 
     private String handleResign() {
         try {
-            return chessClient.resignGame();
+            return chessClient.resignGame(gameID);
         } catch (Exception ex) {
             return "Error: Unable to resign." + ex.getMessage();
         }

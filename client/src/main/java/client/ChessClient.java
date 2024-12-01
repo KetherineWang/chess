@@ -160,8 +160,14 @@ public class ChessClient implements ServerMessageObserver {
         return null;
     }
 
-    public String resignGame() {
-        return null;
+    public String resignGame(int gameID) {
+        try {
+            UserGameCommand resignCommand = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
+            webSocketCommunicator.send(new Gson().toJson(resignCommand));
+            return "You have resigned. Waiting for confirmation...";
+        } catch (Exception ex) {
+            return "Error: An unexpected error occurred while resigning from a game.";
+        }
     }
 
     private String handleError(ResponseException ex, String action) {
