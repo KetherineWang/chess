@@ -18,6 +18,7 @@ import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import com.google.gson.Gson;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 
 @WebSocket
@@ -39,32 +40,33 @@ public class WebSocketHandler {
         switch (userGameCommand.getCommandType()) {
             case CONNECT -> handleConnect(session, userGameCommand);
             case MAKE_MOVE -> handleMakeMove(session, makeMoveCommand);
+            case LEAVE -> handleLeave(session, userGameCommand);
             case RESIGN -> handleResign(session, userGameCommand);
             default -> sendError(session, "Unsupported command: " + userGameCommand.getCommandType());
         }
     }
 
-    private void handleConnect(Session session, UserGameCommand command) throws IOException {
+    private void handleConnect(Session session, UserGameCommand connectCommand) throws IOException {
         try {
-            String username = authenticateUser(session, command.getAuthToken());
+            String username = authenticateUser(session, connectCommand.getAuthToken());
             if (username == null) {
                 return;
             }
 
-            GameData gameData = fetchGame(session, command.getGameID());
+            GameData gameData = fetchGame(session, connectCommand.getGameID());
             if (gameData == null) {
                 return;
             }
 
             String role = determineRole(username, gameData);
 
-            connections.add(command.getGameID(), username, session);
+            connections.add(connectCommand.getGameID(), username, session);
 
             LoadGameMessage loadGameMessage = new LoadGameMessage(gameData, role);
-            connections.getConnection(command.getGameID(), username).send(gson.toJson(loadGameMessage));
+            connections.getConnection(connectCommand.getGameID(), username).send(gson.toJson(loadGameMessage));
 
             NotificationMessage connectNotification = new NotificationMessage(username + " joined as " + role);
-            connections.broadcast(command.getGameID(), username, gson.toJson(connectNotification));
+            connections.broadcast(connectCommand.getGameID(), username, gson.toJson(connectNotification));
         } catch (Exception ex) {
             sendError(session, "Error processing CONNECT command: " + ex.getMessage());
         }
@@ -105,7 +107,9 @@ public class WebSocketHandler {
             }
 
             try {
-                gameDAO.updateGame(new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), chessGame));
+                gameDAO.updateGame(
+                        new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), chessGame)
+                );
             } catch (DataAccessException ex) {
                 sendError(session, "Error updating game data: " + ex.getMessage());
                 return;
@@ -145,14 +149,14 @@ public class WebSocketHandler {
         }
     }
 
-    private void handleResign(Session session, UserGameCommand userGameCommand) throws IOException {
+    private void handleResign(Session session, UserGameCommand resignCommand) throws IOException {
         try {
-            String username = authenticateUser(session, userGameCommand.getAuthToken());
+            String username = authenticateUser(session, resignCommand.getAuthToken());
             if (username == null) {
                 return;
             }
 
-            GameData gameData = fetchGame(session, userGameCommand.getGameID());
+            GameData gameData = fetchGame(session, resignCommand.getGameID());
             if (gameData == null) {
                 return;
             }
@@ -173,7 +177,9 @@ public class WebSocketHandler {
             chessGame.resign();
 
             try {
-                gameDAO.updateGame(new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), chessGame));
+                gameDAO.updateGame(
+                        new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), chessGame)
+                );
             } catch (DataAccessException ex) {
                 sendError(session, "Error updating game data: " + ex.getMessage());
                 return;
@@ -181,10 +187,47 @@ public class WebSocketHandler {
 
             String resignMessage = String.format("%s has resigned. The game is over.", username);
             NotificationMessage resignNotification = new NotificationMessage(resignMessage);
-            connections.getConnection(userGameCommand.getGameID(), username).send(gson.toJson(resignNotification));
-            connections.broadcast(userGameCommand.getGameID(), username, gson.toJson(resignNotification));
+            connections.getConnection(resignCommand.getGameID(), username).send(gson.toJson(resignNotification));
+            connections.broadcast(resignCommand.getGameID(), username, gson.toJson(resignNotification));
         } catch (Exception ex) {
             sendError(session, "Error processing RESIGN command: " + ex.getMessage());
+        }
+    }
+
+    private void handleLeave(Session session, UserGameCommand leaveCommand) throws IOException {
+        try {
+            String username = authenticateUser(session, leaveCommand.getAuthToken());
+            if (username == null) {
+                return;
+            }
+
+            GameData gameData = fetchGame(session, leaveCommand.getGameID());
+            if (gameData == null) {
+                return;
+            }
+
+            connections.remove(leaveCommand.getGameID(), username);
+
+            String role = determineRole(username, gameData);
+            if (role.equals("white")) {
+                gameDAO.updateGame(
+                        new GameData(gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(), gameData.chessGame())
+                );
+            } else if (role.equals("black")) {
+                gameDAO.updateGame(
+                        new GameData(gameData.gameID(), gameData.whiteUsername(), null, gameData.gameName(), gameData.chessGame())
+                );
+            }
+
+            String leaveMessage = String.format("%s has left the game.", username);
+            NotificationMessage leaveNotification = new NotificationMessage(leaveMessage);
+            connections.broadcast(leaveCommand.getGameID(), username, gson.toJson(leaveNotification));
+
+            session.close(1000, "You have left the game.");
+        } catch (DataAccessException ex) {
+            sendError(session, "Error updating game data: " + ex.getMessage());
+        } catch (Exception e) {
+            sendError(session, "Error processing LEAVE command: " + e.getMessage());
         }
     }
 

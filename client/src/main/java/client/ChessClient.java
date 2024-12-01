@@ -24,6 +24,7 @@ public class ChessClient implements ServerMessageObserver {
     private String username;
     private List<GameData> currentGameList;
     private WebSocketCommunicator webSocketCommunicator;
+    private final Gson gson = new Gson();
 
     public ChessClient(String serverURL, ChessApp chessApp) {
         this.serverFacade = new ServerFacade(serverURL);
@@ -149,8 +150,8 @@ public class ChessClient implements ServerMessageObserver {
     public String makeMove(int gameID, ChessMove chessMove) {
         try {
             MakeMoveCommand makeMoveCommand = new MakeMoveCommand(authToken, gameID, chessMove);
-            webSocketCommunicator.send(new Gson().toJson(makeMoveCommand));
-            return "Move sent to server.";
+            webSocketCommunicator.send(gson.toJson(makeMoveCommand));
+            return "Make move request sent to WebSocket server.";
         } catch (Exception ex) {
             return "Error: An unexpected error occurred while sending move to server.";
         }
@@ -163,8 +164,8 @@ public class ChessClient implements ServerMessageObserver {
     public String resignGame(int gameID) {
         try {
             UserGameCommand resignCommand = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
-            webSocketCommunicator.send(new Gson().toJson(resignCommand));
-            return "You have resigned. Waiting for confirmation...";
+            webSocketCommunicator.send(gson.toJson(resignCommand));
+            return "Resign request sent to WebSocket server.";
         } catch (Exception ex) {
             return "Error: An unexpected error occurred while resigning from a game.";
         }
@@ -231,7 +232,7 @@ public class ChessClient implements ServerMessageObserver {
             UserGameCommand connectCommand = new UserGameCommand(
                     UserGameCommand.CommandType.CONNECT, authToken, gameID
             );
-            webSocketCommunicator.send(new Gson().toJson(connectCommand));
+            webSocketCommunicator.send(gson.toJson(connectCommand));
 
             return "Connected to game!";
         } catch (Exception ex) {

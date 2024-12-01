@@ -23,6 +23,7 @@ public class Server {
     private final CreateGameService createGameService;
     private final JoinGameService joinGameService;
     private final WebSocketHandler webSocketHandler;
+    private final Gson gson = new Gson();
 
     public Server() {
         try {
@@ -88,7 +89,7 @@ public class Server {
 
     private Object registerUser(Request req, Response res) throws ResponseException {
         try {
-            RegisterRequest registerRequest = new Gson().fromJson(req.body(), RegisterRequest.class);
+            RegisterRequest registerRequest = gson.fromJson(req.body(), RegisterRequest.class);
             if (registerRequest.username() == null || registerRequest.username().isEmpty() ||
                 registerRequest.password() == null || registerRequest.password().isEmpty() ||
                 registerRequest.email() == null || registerRequest.email().isEmpty()) {
@@ -102,7 +103,7 @@ public class Server {
 
             RegisterResult registerResult = new RegisterResult(authData.username(), authData.authToken());
             res.status(200);
-            return new Gson().toJson(registerResult);
+            return gson.toJson(registerResult);
         } catch (DataAccessException ex) {
             res.status(403);
             return "{ \"message\": \"Error: already taken\" }";
@@ -114,13 +115,13 @@ public class Server {
 
     private Object loginUser(Request req, Response res) throws ResponseException {
         try {
-            LoginRequest loginRequest = new Gson().fromJson(req.body(), LoginRequest.class);
+            LoginRequest loginRequest = gson.fromJson(req.body(), LoginRequest.class);
 
             AuthData authData = loginService.login(loginRequest.username(), loginRequest.password());
 
             LoginResult loginResult = new LoginResult(authData.username(), authData.authToken());
             res.status(200);
-            return new Gson().toJson(loginResult);
+            return gson.toJson(loginResult);
         } catch (DataAccessException ex) {
             res.status(401);
             return "{ \"message\": \"Error: unauthorized\" }";
@@ -158,7 +159,7 @@ public class Server {
                 return "{ \"message\": \"Error: unauthorized\" }";
             }
 
-            CreateGameRequest createGameRequest = new Gson().fromJson(req.body(), CreateGameRequest.class);
+            CreateGameRequest createGameRequest = gson.fromJson(req.body(), CreateGameRequest.class);
             if (createGameRequest.gameName() == null || createGameRequest.gameName().isEmpty()) {
                 res.status(400);
                 return "{ \"message\": \"Error: bad request\" }";
@@ -168,7 +169,7 @@ public class Server {
 
             CreateGameResult createGameResult = new CreateGameResult(gameID);
             res.status(200);
-            return new Gson().toJson(createGameResult);
+            return gson.toJson(createGameResult);
         } catch (DataAccessException ex) {
             if (ex.getMessage().equals("Invalid game name.")) {
                 res.status(400);
@@ -198,7 +199,7 @@ public class Server {
 
             ListGameResult listGameResult = new ListGameResult(games);
             res.status(200);
-            return new Gson().toJson(listGameResult);
+            return gson.toJson(listGameResult);
         } catch (DataAccessException ex) {
             res.status(401);
             return "{ \"message\": \"Error: unauthorized\" }";
@@ -216,7 +217,7 @@ public class Server {
                 return "{ \"message\": \"Error: unauthorized\" }";
             }
 
-            JoinGameRequest joinGameRequest = new Gson().fromJson(req.body(), JoinGameRequest.class);
+            JoinGameRequest joinGameRequest = gson.fromJson(req.body(), JoinGameRequest.class);
             if (joinGameRequest.gameID() == 0 || joinGameRequest.playerColor() == null || joinGameRequest.playerColor().isEmpty()) {
                 res.status(400);
                 return "{ \"message\": \"Error: bad request\" }";

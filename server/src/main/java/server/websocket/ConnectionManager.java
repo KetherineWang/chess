@@ -14,11 +14,14 @@ public class ConnectionManager {
         gameConnections.computeIfAbsent(gameID, k -> new ConcurrentHashMap<>()).put(username, new Connection(username, session));
     }
 
-    public void remove(String username) {
-        gameConnections.values().forEach(connections ->
-                connections.values().removeIf(connection -> connection.username.equals(username))
-        );
-        gameConnections.entrySet().removeIf(entry -> entry.getValue().isEmpty());
+    public void remove(int gameID, String username) {
+        Map<String, Connection> connections = gameConnections.get(gameID);
+        if (connections != null) {
+            connections.remove(username);
+            if (connections.isEmpty()) {
+                gameConnections.remove(gameID);
+            }
+        }
     }
 
     public Connection getConnection(int gameID, String username) {

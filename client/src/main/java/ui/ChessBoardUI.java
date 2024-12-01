@@ -23,7 +23,8 @@ public class ChessBoardUI {
 
     private static void drawBoard(PrintStream out, ChessBoard chessBoard, boolean whiteBottom) {
         String[] rows = new String[] {"1", "2", "3", "4", "5", "6", "7", "8"};
-        String[] columns = whiteBottom ? new String[] {"a", "b", "c", "d", "e", "f", "g", "h"} : new String[] {"h", "g", "f", "e", "d", "c", "b", "a"};
+        String[] columns = whiteBottom ?
+                new String[] {"a", "b", "c", "d", "e", "f", "g", "h"} : new String[] {"h", "g", "f", "e", "d", "c", "b", "a"};
         ChessPiece[][] board = chessBoard.getBoard();
 
         out.print("   ");

@@ -10,6 +10,7 @@ import java.util.List;
 
 public class ServerFacade {
     private final String serverURL;
+    private final Gson gson = new Gson();
 
     public ServerFacade(String serverURL) {
         this.serverURL = serverURL;
@@ -66,7 +67,7 @@ public class ServerFacade {
 
             if (request != null) {
                 http.addRequestProperty("Content-Type", "application/json");
-                String requestData = new Gson().toJson(request);
+                String requestData = gson.toJson(request);
                 try (OutputStream requestBody = http.getOutputStream()) {
                     requestBody.write(requestData.getBytes());
                 }
@@ -90,13 +91,13 @@ public class ServerFacade {
                 } else {
                     try (InputStream responseBody = http.getInputStream();
                          InputStreamReader reader = new InputStreamReader(responseBody)) {
-                        return new Gson().fromJson(reader, responseClass);
+                        return gson.fromJson(reader, responseClass);
                     }
                 }
             } else {
                 try (InputStream errorBody = http.getErrorStream();
                      InputStreamReader reader = new InputStreamReader(errorBody)) {
-                    String errorResponse = new Gson().fromJson(reader, ErrorResponse.class).message();
+                    String errorResponse = gson.fromJson(reader, ErrorResponse.class).message();
                     throw new ResponseException(statusCode, errorResponse);
                 }
             }

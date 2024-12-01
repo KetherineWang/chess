@@ -8,7 +8,9 @@ public class ServerMessageDeserializer implements JsonDeserializer<ServerMessage
     @Override
     public ServerMessage deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         JsonObject jsonObject = json.getAsJsonObject();
-        ServerMessage.ServerMessageType serverMessageType = ServerMessage.ServerMessageType.valueOf(jsonObject.get("serverMessageType").getAsString());
+        ServerMessage.ServerMessageType serverMessageType = ServerMessage.ServerMessageType.valueOf(
+                jsonObject.get("serverMessageType").getAsString()
+        );
 
         switch (serverMessageType) {
             case NOTIFICATION:
