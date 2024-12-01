@@ -10,7 +10,6 @@ import java.util.HashSet;
  * signature of the existing methods.
  */
 public class ChessGame {
-
     private TeamColor teamTurn;
     private ChessBoard board;
 

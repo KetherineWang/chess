@@ -9,6 +9,7 @@ import dataaccess.GameDAO;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
+import org.eclipse.jetty.server.Authentication;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import websocket.commands.UserGameCommand;
@@ -18,7 +19,6 @@ import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import com.google.gson.Gson;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 
 @WebSocket
@@ -40,6 +40,7 @@ public class WebSocketHandler {
         switch (userGameCommand.getCommandType()) {
             case CONNECT -> handleConnect(session, userGameCommand);
             case MAKE_MOVE -> handleMakeMove(session, makeMoveCommand);
+            case RESIGN -> handleResign(session, userGameCommand);
             default -> sendError(session, "Unsupported command: " + userGameCommand.getCommandType());
         }
     }
@@ -69,20 +70,21 @@ public class WebSocketHandler {
     private void handleMakeMove(Session session, MakeMoveCommand makeMoveCommand) throws IOException {
         try {
             String username = authenticateUser(session, makeMoveCommand.getAuthToken());
-            if (username == null) {
-                return;
-            }
+            if (username == null) { return; }
 
             GameData gameData = fetchGame(session, makeMoveCommand.getGameID());
-            if (gameData == null) {
-                return;
-            }
+            if (gameData == null) { return; }
 
             String role = determineRole(username, gameData);
 
             ChessGame chessGame = gameData.chessGame();
-            ChessMove chessMove = makeMoveCommand.getMove();
 
+            if (!authorizedMakeMove(username, gameData)) {
+                sendError(session, "You are not authorized to make this move.");
+                return;
+            }
+
+            ChessMove chessMove = makeMoveCommand.getMove();
             try {
                 chessGame.makeMove(chessMove);
             } catch (InvalidMoveException ex) {
@@ -94,6 +96,7 @@ public class WebSocketHandler {
                 gameDAO.updateGame(new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), chessGame));
             } catch (DataAccessException ex) {
                 sendError(session, "Error updating game data: " + ex.getMessage());
+                return;
             }
 
             LoadGameMessage loadGameMessage = new LoadGameMessage(gameData, role);
@@ -106,17 +109,21 @@ public class WebSocketHandler {
             NotificationMessage makeMoveNotification = new NotificationMessage(makeMoveMessage);
             connections.broadcast(makeMoveCommand.getGameID(), username, gson.toJson(makeMoveNotification));
 
-            if (chessGame.isInCheck(chessGame.getTeamTurn())) {
-                String checkMessage = String.format("%s is in check!", username);
-                NotificationMessage checkNotification = new NotificationMessage(checkMessage);
-                connections.broadcast(makeMoveCommand.getGameID(), username, gson.toJson(checkNotification));
-            } else if (chessGame.isInCheckmate(chessGame.getTeamTurn())) {
-                String checkmateMessage = String.format("%s is in checkmate!", username);
+            String opponent = chessGame.getTeamTurn() == ChessGame.TeamColor.WHITE ? gameData.whiteUsername() : gameData.blackUsername();
+            if (chessGame.isInCheckmate(chessGame.getTeamTurn())) {
+                String checkmateMessage = String.format("%s is in checkmate! The game is over.", opponent);
                 NotificationMessage checkmateNotification = new NotificationMessage(checkmateMessage);
+                connections.getConnection(makeMoveCommand.getGameID(), username).send(gson.toJson(checkmateNotification));
                 connections.broadcast(makeMoveCommand.getGameID(), username, gson.toJson(checkmateNotification));
+            } else if (chessGame.isInCheck(chessGame.getTeamTurn())) {
+                String checkMessage = String.format("%s is in check!", opponent);
+                NotificationMessage checkNotification = new NotificationMessage(checkMessage);
+                connections.getConnection(makeMoveCommand.getGameID(), username).send(gson.toJson(checkNotification));
+                connections.broadcast(makeMoveCommand.getGameID(), username, gson.toJson(checkNotification));
             } else if (chessGame.isInStalemate(chessGame.getTeamTurn())) {
                 String stalemateMessage = "The game is in stalemate!";
                 NotificationMessage stalemateNotification = new NotificationMessage(stalemateMessage);
+                connections.getConnection(makeMoveCommand.getGameID(), username).send(gson.toJson(stalemateNotification));
                 connections.broadcast(makeMoveCommand.getGameID(), username, gson.toJson(stalemateNotification));
             }
         } catch (Exception ex) {
@@ -124,28 +131,40 @@ public class WebSocketHandler {
         }
     }
 
-    private String authenticateUser(Session session, String authToken) throws IOException {
+    private void handleResign(Session session, UserGameCommand userGameCommand) throws IOException {
         try {
-            String username = retrieveUsername(authToken);
-            if (username == null) {
-                sendError(session, "Invalid auth token.");
+            String username = authenticateUser(session, userGameCommand.getAuthToken());
+            if (username == null) { return; }
+
+            GameData gameData = fetchGame(session, userGameCommand.getGameID());
+            if (gameData == null) { return; }
+
+            ChessGame chessGame = gameData.chessGame();
+            chessGame.setGameOver(true);
+
+            try {
+                gameDAO.updateGame(new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), chessGame));
+            } catch (DataAccessException ex) {
+                sendError(session, "Error updating game data: " + ex.getMessage());
+                return;
             }
-            return username;
+
+            String resignMessage = String.format("%s has resigned. The game is over.", username);
+            NotificationMessage resignNotification = new NotificationMessage(resignMessage);
+            connections.getConnection(userGameCommand.getGameID(), username).send(gson.toJson(resignNotification));
+            connections.broadcast(userGameCommand.getGameID(), username, gson.toJson(resignNotification));
         } catch (Exception ex) {
-            sendError(session, "Error authenticating user: " + ex.getMessage());
-            return null;
+            sendError(session, "Error processing RESIGN command: " + ex.getMessage());
         }
     }
 
-    private GameData fetchGame(Session session, int gameID) throws IOException {
+    private String authenticateUser(Session session, String authToken) throws IOException {
         try {
-            GameData gameData = gameDAO.getGame(gameID);
-            if (gameData == null) {
-                sendError(session, "Game not found.");
-            }
-            return gameData;
-        } catch (DataAccessException ex) {
-            sendError(session, "Error fetching game data: " + ex.getMessage());
+            String username = retrieveUsername(authToken);
+            if (username == null) { sendError(session, "Invalid auth token."); }
+            return username;
+        } catch (Exception ex) {
+            sendError(session, "Error authenticating user: " + ex.getMessage());
             return null;
         }
     }
@@ -159,6 +178,27 @@ public class WebSocketHandler {
         }
     }
 
+    private GameData fetchGame(Session session, int gameID) throws IOException {
+        try {
+            GameData gameData = gameDAO.getGame(gameID);
+            if (gameData == null) { sendError(session, "Game not found."); }
+            return gameData;
+        } catch (DataAccessException ex) {
+            sendError(session, "Error fetching game data: " + ex.getMessage());
+            return null;
+        }
+    }
+
+    private boolean authorizedMakeMove(String username, GameData gameData) {
+        ChessGame.TeamColor currentTurn = gameData.chessGame().getTeamTurn();
+        if (currentTurn == ChessGame.TeamColor.WHITE) {
+            return username.equals(gameData.whiteUsername());
+        } else if (currentTurn == ChessGame.TeamColor.BLACK) {
+            return username.equals(gameData.blackUsername());
+        }
+        return false;
+    }
+
     private String determineRole(String username, GameData gameData) {
         if (username.equals(gameData.whiteUsername())) {
             return "white";
@@ -170,9 +210,7 @@ public class WebSocketHandler {
     }
 
     private String reformatPosition(ChessPosition chessPosition) {
-        if (chessPosition == null) {
-            return "";
-        }
+        if (chessPosition == null) { return ""; }
 
         char columnChar = (char) ('a' + chessPosition.getColumn() - 1);
 
