@@ -12,6 +12,7 @@ import java.util.HashSet;
 public class ChessGame {
     private TeamColor teamTurn;
     private ChessBoard board;
+    private boolean gameOver = false;
 
     public ChessGame() {
         this.board = new ChessBoard();
@@ -33,6 +34,14 @@ public class ChessGame {
      */
     public void setTeamTurn(TeamColor team) {
         this.teamTurn = team;
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
     }
 
     /**
@@ -69,7 +78,6 @@ public class ChessGame {
                 validMoves.add(move);
             }
         }
-
         return validMoves;
     }
 
@@ -91,7 +99,6 @@ public class ChessGame {
                 }
             }
         }
-
         return false;
     }
 
@@ -103,7 +110,6 @@ public class ChessGame {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -118,7 +124,6 @@ public class ChessGame {
                 }
             }
         }
-
         return null;
     }
 
@@ -129,6 +134,10 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if (gameOver) {
+            throw new InvalidMoveException("Cannot make a move. The game is over.");
+        }
+
         ChessPiece pieceToMove = board.getPiece(move.getStartPosition());
 
         if (pieceToMove == null) {
@@ -170,7 +179,6 @@ public class ChessGame {
         if (!isInCheck(teamColor)) {
             return false;
         }
-
         return !hasValidMoves(teamColor, board);
     }
 
@@ -185,7 +193,6 @@ public class ChessGame {
         if (isInCheck(teamColor)) {
             return false;
         }
-
         return !hasValidMoves(teamColor, board);
     }
 
@@ -200,7 +207,6 @@ public class ChessGame {
                 }
             }
         }
-
         return false;
     }
 
@@ -216,7 +222,6 @@ public class ChessGame {
                 return true;
             }
         }
-
         return false;
     }
 

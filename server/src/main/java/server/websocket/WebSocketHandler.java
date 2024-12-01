@@ -9,7 +9,6 @@ import dataaccess.GameDAO;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
-import org.eclipse.jetty.server.Authentication;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import websocket.commands.UserGameCommand;
@@ -48,10 +47,14 @@ public class WebSocketHandler {
     private void handleConnect(Session session, UserGameCommand command) throws IOException {
         try {
             String username = authenticateUser(session, command.getAuthToken());
-            if (username == null) { return; }
+            if (username == null) {
+                return;
+            }
 
             GameData gameData = fetchGame(session, command.getGameID());
-            if (gameData == null) { return; }
+            if (gameData == null) {
+                return;
+            }
 
             String role = determineRole(username, gameData);
 
@@ -70,14 +73,23 @@ public class WebSocketHandler {
     private void handleMakeMove(Session session, MakeMoveCommand makeMoveCommand) throws IOException {
         try {
             String username = authenticateUser(session, makeMoveCommand.getAuthToken());
-            if (username == null) { return; }
+            if (username == null) {
+                return;
+            }
 
             GameData gameData = fetchGame(session, makeMoveCommand.getGameID());
-            if (gameData == null) { return; }
+            if (gameData == null) {
+                return;
+            }
 
             String role = determineRole(username, gameData);
 
             ChessGame chessGame = gameData.chessGame();
+
+            if (chessGame.isGameOver()) {
+                sendError(session, "Cannot make a move. The game is over.");
+                return;
+            }
 
             if (!authorizedMakeMove(username, gameData)) {
                 sendError(session, "You are not authorized to make this move.");
@@ -111,6 +123,7 @@ public class WebSocketHandler {
 
             String opponent = chessGame.getTeamTurn() == ChessGame.TeamColor.WHITE ? gameData.whiteUsername() : gameData.blackUsername();
             if (chessGame.isInCheckmate(chessGame.getTeamTurn())) {
+                chessGame.setGameOver(true);
                 String checkmateMessage = String.format("%s is in checkmate! The game is over.", opponent);
                 NotificationMessage checkmateNotification = new NotificationMessage(checkmateMessage);
                 connections.getConnection(makeMoveCommand.getGameID(), username).send(gson.toJson(checkmateNotification));
@@ -121,6 +134,7 @@ public class WebSocketHandler {
                 connections.getConnection(makeMoveCommand.getGameID(), username).send(gson.toJson(checkNotification));
                 connections.broadcast(makeMoveCommand.getGameID(), username, gson.toJson(checkNotification));
             } else if (chessGame.isInStalemate(chessGame.getTeamTurn())) {
+                chessGame.setGameOver(true);
                 String stalemateMessage = "The game is in stalemate!";
                 NotificationMessage stalemateNotification = new NotificationMessage(stalemateMessage);
                 connections.getConnection(makeMoveCommand.getGameID(), username).send(gson.toJson(stalemateNotification));
@@ -134,10 +148,14 @@ public class WebSocketHandler {
     private void handleResign(Session session, UserGameCommand userGameCommand) throws IOException {
         try {
             String username = authenticateUser(session, userGameCommand.getAuthToken());
-            if (username == null) { return; }
+            if (username == null) {
+                return;
+            }
 
             GameData gameData = fetchGame(session, userGameCommand.getGameID());
-            if (gameData == null) { return; }
+            if (gameData == null) {
+                return;
+            }
 
             ChessGame chessGame = gameData.chessGame();
             chessGame.setGameOver(true);
@@ -161,7 +179,9 @@ public class WebSocketHandler {
     private String authenticateUser(Session session, String authToken) throws IOException {
         try {
             String username = retrieveUsername(authToken);
-            if (username == null) { sendError(session, "Invalid auth token."); }
+            if (username == null) {
+                sendError(session, "Invalid auth token.");
+            }
             return username;
         } catch (Exception ex) {
             sendError(session, "Error authenticating user: " + ex.getMessage());
@@ -181,7 +201,9 @@ public class WebSocketHandler {
     private GameData fetchGame(Session session, int gameID) throws IOException {
         try {
             GameData gameData = gameDAO.getGame(gameID);
-            if (gameData == null) { sendError(session, "Game not found."); }
+            if (gameData == null) {
+                sendError(session, "Game not found.");
+            }
             return gameData;
         } catch (DataAccessException ex) {
             sendError(session, "Error fetching game data: " + ex.getMessage());
@@ -210,7 +232,9 @@ public class WebSocketHandler {
     }
 
     private String reformatPosition(ChessPosition chessPosition) {
-        if (chessPosition == null) { return ""; }
+        if (chessPosition == null) {
+            return "";
+        }
 
         char columnChar = (char) ('a' + chessPosition.getColumn() - 1);
 
