@@ -153,12 +153,21 @@ public class ChessClient implements ServerMessageObserver {
             webSocketCommunicator.send(gson.toJson(makeMoveCommand));
             return "Make move request sent to WebSocket server.";
         } catch (Exception ex) {
-            return "Error: An unexpected error occurred while sending move to server.";
+            return "Error: An unexpected error occurred while making a move.";
         }
     }
 
-    public String leaveGame() {
-        return null;
+    public String leaveGame(int gameID) {
+        try {
+            UserGameCommand leaveCommand = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
+            webSocketCommunicator.send(gson.toJson(leaveCommand));
+
+            chessApp.switchToPostLogin();
+
+            return "Leave request sent to WebSocket Server.";
+        } catch (Exception ex) {
+            return "Error: An unexpected error occurred while leaving a game.";
+        }
     }
 
     public String resignGame(int gameID) {

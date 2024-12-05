@@ -11,6 +11,7 @@ import static ui.EscapeSequences.*;
 public class GameplayRepl implements Repl {
     private final ChessClient chessClient;
     private final int gameID;
+    private boolean pendingResignation = false;
 
     public GameplayRepl(ChessClient chessClient, int gameID) {
         this.chessClient = chessClient;
@@ -26,6 +27,10 @@ public class GameplayRepl implements Repl {
 
         var command = tokens[0].toLowerCase();
         var args = Arrays.copyOfRange(tokens, 1, tokens.length);
+
+        if (pendingResignation) {
+            return handleResignationConfirmation(command);
+        }
 
         try {
             return switch (command) {
@@ -67,17 +72,34 @@ public class GameplayRepl implements Repl {
 
     private String handleLeave() {
         try {
-            return chessClient.leaveGame();
+            return chessClient.leaveGame(gameID);
         } catch (Exception ex) {
             return "Error: Unable to leave game. " + ex.getMessage();
         }
     }
 
     private String handleResign() {
-        try {
-            return chessClient.resignGame(gameID);
-        } catch (Exception ex) {
-            return "Error: Unable to resign." + ex.getMessage();
+        pendingResignation = true;
+        return "Are you sure you want to resign? Type 'yes' to confirm or 'no' to cancel.";
+    }
+
+    private String handleResignationConfirmation(String input) {
+        switch (input.toLowerCase()) {
+            case "yes" -> {
+                pendingResignation = false;
+                try {
+                    return chessClient.resignGame(gameID);
+                } catch (Exception ex) {
+                    return "Error: Unable to resign." + ex.getMessage();
+                }
+            }
+            case "no" -> {
+                pendingResignation = false;
+                return "Resign canceled.";
+            }
+            default -> {
+                return "Invalid input. Type 'yes' to confirm resignation or 'no' to cancel resignation.";
+            }
         }
     }
 
@@ -121,11 +143,11 @@ public class GameplayRepl implements Repl {
     public String help() {
         return """
                Available commands:
-               move <START_POSITION> <END_POSITION>     - to make a move
-               leave                                    - to leave the game
-               resign                                   - to resign from the game
-               quit                                     - to exit the application
-               help                                     - to display available commands (this message)
+               move <START_POSITION> <END_POSITION> [PROMOTION_PIECE]    - to make a move
+               leave                                                     - to leave the game
+               resign                                                    - to resign from the game
+               quit                                                      - to exit the application
+               help                                                      - to display available commands (this message)
                """;
     }
 
