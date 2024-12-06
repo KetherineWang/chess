@@ -35,6 +35,7 @@ public class GameplayRepl implements Repl {
         try {
             return switch (command) {
                 case "move" -> handleMove(args);
+                case "highlight" -> handleHighlight(args);
                 case "leave" -> handleLeave();
                 case "resign" -> handleResign();
                 case "quit" -> "quit";
@@ -90,7 +91,7 @@ public class GameplayRepl implements Repl {
                 try {
                     return chessClient.resignGame(gameID);
                 } catch (Exception ex) {
-                    return "Error: Unable to resign." + ex.getMessage();
+                    return "Error: Unable to resign. " + ex.getMessage();
                 }
             }
             case "no" -> {
@@ -100,6 +101,19 @@ public class GameplayRepl implements Repl {
             default -> {
                 return "Invalid input. Type 'yes' to confirm resignation or 'no' to cancel resignation.";
             }
+        }
+    }
+
+    private String handleHighlight(String[] args) {
+        if (args.length != 1) {
+            return "Error: Highlight legal moves requires 1 argument: 'highlight <POSITION>'.";
+        }
+
+        try {
+            ChessPosition chessPosition = parsePosition(args[0]);
+            return chessClient.highlightLegalMoves(gameID, chessPosition);
+        } catch (Exception ex) {
+            return "Error: Unable to highlight legal moves. " + ex.getMessage();
         }
     }
 
@@ -144,6 +158,7 @@ public class GameplayRepl implements Repl {
         return """
                Available commands:
                move <START_POSITION> <END_POSITION> [PROMOTION_PIECE]    - to make a move
+               highlight <POSITION>                                      - to highlight legal moves
                leave                                                     - to leave the game
                resign                                                    - to resign from the game
                quit                                                      - to exit the application

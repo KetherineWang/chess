@@ -2,6 +2,7 @@ package client;
 
 import chess.ChessMove;
 import chess.ChessBoard;
+import chess.ChessPosition;
 import model.*;
 import ui.ChessBoardUI;
 import client.websocket.WebSocketCommunicator;
@@ -16,6 +17,8 @@ import com.google.gson.Gson;
 import exception.ResponseException;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class ChessClient implements ServerMessageObserver {
     private final ServerFacade serverFacade;
@@ -177,6 +180,33 @@ public class ChessClient implements ServerMessageObserver {
             return "Resign request sent to WebSocket server.";
         } catch (Exception ex) {
             return "Error: An unexpected error occurred while resigning from a game.";
+        }
+    }
+
+    public String highlightLegalMoves(int gameID, ChessPosition chessPosition) {
+        try {
+            GameData gameData = serverFacade.getGame(authToken, gameID);
+            System.out.println("Fetched GameData: " + gson.toJson(gameData));
+            if (gameData == null) {
+                return "Error: Unable to fetch game data.";
+            }
+
+            Collection<ChessMove> legalMoves = gameData.chessGame().validMoves(chessPosition);
+            if (legalMoves == null || legalMoves.isEmpty()) {
+                return "No legal moves available for this piece at this position.";
+            }
+
+            List<ChessPosition> highlightedPositions = legalMoves.stream().map(ChessMove::getEndPosition).toList();
+            highlightedPositions.add(chessPosition);
+
+            ChessBoard chessBoard = gameData.chessGame().getBoard();
+            boolean whiteBottom = username.equals(gameData.whiteUsername()) ||
+                    (!username.equals(gameData.whiteUsername()) && !username.equals(gameData.blackUsername()));
+            ChessBoardUI.drawHighlightedChessBoard(chessBoard, whiteBottom, highlightedPositions);
+
+            return "Legal moves highlighted.";
+        } catch (Exception ex) {
+            return "Error: An unexpected error occurred while highlighting legal moves." + ex.getMessage();
         }
     }
 

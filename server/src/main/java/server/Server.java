@@ -60,6 +60,7 @@ public class Server {
         Spark.delete("/session", this::logoutUser);
         Spark.post("/game", this::createGame);
         Spark.get("/game", this::listGames);
+        Spark.get("/game/:gameID", this::getGame);
         Spark.put("/game", this::joinGame);
 
         Spark.exception(ResponseException.class, this::exceptionHandler);
@@ -203,6 +204,39 @@ public class Server {
         } catch (DataAccessException ex) {
             res.status(401);
             return "{ \"message\": \"Error: unauthorized\" }";
+        } catch (Exception e) {
+            res.status(500);
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
+
+    private Object getGame(Request req, Response res) throws ResponseException {
+        try {
+            String authToken = req.headers("Authorization");
+            if (authToken == null || authToken.isEmpty()) {
+                res.status(401);
+                return "{ \"message\": \"Error: unauthorized\" }";
+            }
+
+            int gameID;
+            try {
+                gameID = Integer.parseInt(req.params("gameID"));
+            } catch (NumberFormatException ex) {
+                res.status(400);
+                return "{ \"message\": \"Error: bad request\" }";
+            }
+
+            GameData gameData = gameDAO.getGame(gameID);
+            if (gameData == null) {
+                res.status(404);
+                return "{ \"message\": \"Error: game not found\" }";
+            }
+
+            res.status(200);
+            return gson.toJson(gameData);
+        } catch (DataAccessException ex) {
+            res.status(500);
+            throw new ResponseException(500, ex.getMessage());
         } catch (Exception e) {
             res.status(500);
             throw new ResponseException(500, e.getMessage());

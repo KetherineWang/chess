@@ -7,6 +7,7 @@ import exception.ResponseException;
 import java.io.*;
 import java.net.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ServerFacade {
     private final String serverURL;
@@ -39,6 +40,11 @@ public class ServerFacade {
     public List<GameData> listGames(String authToken) throws ResponseException {
         String path = "/game";
         return makeAuthRequest("GET", path, null, authToken, ListGameResult.class).games();
+    }
+
+    public GameData getGame(String authToken, int gameID) throws ResponseException {
+        String path = "/game/" + gameID;
+        return makeAuthRequest("GET", path, null, authToken, GameData.class);
     }
 
     public void joinGame(String authToken, JoinGameRequest joinGameRequest) throws ResponseException {
@@ -97,6 +103,7 @@ public class ServerFacade {
             } else {
                 try (InputStream errorBody = http.getErrorStream();
                      InputStreamReader reader = new InputStreamReader(errorBody)) {
+                    System.out.println(new BufferedReader(reader).lines().collect(Collectors.joining("\n")));
                     String errorResponse = gson.fromJson(reader, ErrorResponse.class).message();
                     throw new ResponseException(statusCode, errorResponse);
                 }
